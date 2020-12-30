@@ -6,7 +6,7 @@
 - [Python](python)
 - [Golang](go)
 - [Shell](shell)
-- [Javascript](javascript)
+- [Javascript](js)
 
 ## Program application technology based
 
@@ -16,3 +16,8 @@
 ## Field related
 
 - [Bioinformatics](bioinformatics)
+
+## Recommended materials
+
+- <https://github.com/XSLiuLab/Workshop>
+- <https://github.com/crazyhottommy/getting-started-with-genomics-tools-and-resources>
