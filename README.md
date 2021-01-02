@@ -1,5 +1,7 @@
 # My Self-Study Room
 
+[点击查看直播计划](直播计划.md)
+
 ## Programming language based
 
 - [R](r)
