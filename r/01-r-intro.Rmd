@@ -1,0 +1,267 @@
+---
+title: "R 基础语法介绍"
+author: Shixiang Wang
+date: 2021-01-02
+---
+
+## R 基础语法
+
+### R 语法特点
+
+1. 使用 `<-` 进行赋值
+2. 使用 `#` 进行注释
+3. 语句结束不需要分号 `;`
+
+```{r}
+# 这是一行注释
+# 说明代码的用途
+res <- 2 + 4 * 3
+print(res)
+```
+
+```{r}
+2 + 6 -> res2
+res2
+```
+
+### R 控制流
+
+`if-else`
+
+```{r}
+a <- 6
+if (a > 3) {
+  print("a 比 3 大")
+}
+```
+
+语句块
+
+```{r}
+b <- {
+  a <- 5
+  a + 5
+}
+
+print(b)
+```
+
+
+```{r}
+c <- {
+  a <- 5
+  a <- a + 5
+}
+
+print(c)
+```
+
+`else`:
+
+```{r}
+a <- 2
+if (a > 3) {
+  print("a 比 3 大")
+} else {
+  print("a 比 3 小")
+}
+```
+
+```{r}
+a <- 2
+if (a > 3) {
+  print("a 比 3 大")
+} else if (a < 0) {
+  print("a 比 0 小")
+} else {
+  print("a 比 3 小但比 0 大")
+}
+```
+
+去掉花括号：
+
+```{r}
+a <- 6
+if (a > 3) 
+  print("a 比 3 大")
+```
+
+
+```{r}
+a <- 2
+if (a > 3) print("a 比 3 大") else 
+  print("a 比 3 小但比 0 大")
+```
+
+`switch`:
+
+```{r}
+require(stats)
+centre <- function(x, type) {
+  switch(type,
+         mean = mean(x),
+         median = median(x),
+         trimmed = mean(x, trim = .1))
+  
+  # if (type == "mean") {
+  #   mean(x)
+  # } else if (type == "median") {
+  #   median(x)
+  # } else {
+  #   mean(x, trim = .1)
+  # }
+}
+```
+
+```{r}
+x <- rcauchy(10)
+x
+```
+
+```{r}
+centre(x, "mean")
+centre(x, "median")
+centre(x, "trimmed")
+```
+
+
+`for`：遍历值
+
+```{r}
+1:10
+```
+
+
+```{r}
+for (i in 1:9) {
+  print(i)
+}
+```
+
+```{r}
+a = 1:10
+b = length(a)
+for (i in seq_len(b)) {
+  print(i)
+}
+```
+
+```{r}
+seq(1, 10)
+# 等价于 1:10
+```
+
+```{r}
+seq(1, 10, 2)
+```
+
+```{r}
+a <- letters[1:5]
+a
+```
+
+```{r}
+seq_along(a)
+```
+8 条序列：
+
+```{r}
+seq_len(8)
+```
+
+- `for` 适用于已知序列，想要遍历的情况（知道循环次数）
+- `while` 适用于不知道循环次数，知道循环退出条件的情况
+
+```{r}
+i <- 1
+while(i <= 9) {
+  i <- i + 0.3
+}
+
+print(i)
+```
+
+### 工作空间
+
+```{r}
+rm(a)
+```
+
+```{r}
+ls()
+```
+
+
+```{r}
+rm(list = ls())
+```
+
+
+### R 对象和函数
+
+
+```{r}
+mode(5)
+```
+
+```{r}
+class(5)
+```
+
+```{r}
+class(5L)
+```
+
+```{r}
+typeof(5)
+```
+
+为什么结果不一样？？
+
+- `class()` 表示对象的“类”信息
+- `typeof()` 表示对象是如何存储的，是它的存储结构类型
+
+函数是`()`调用的一组操作，它实际上是模板。
+
+```{r}
+a <- 1:10
+s <- 0
+for (i in a) {
+  s <- i + s
+}
+print(s)
+```
+
+```{r}
+sum2 <- function(x) {
+  s <- 0
+  for (i in x) {
+    s <- i + s
+  }
+  s
+  #return(s)
+}
+```
+
+包：
+
+```{r error=TRUE}
+# 安装包
+install.packages()
+BiocManager::install() # CRAN, BioConductor, GitHub
+
+# 载入包
+library(BiocManager)
+require(BiocManager)
+
+#requireNamespace()
+#loadNamespace()
+
+# 调用函数
+library(BiocManager)
+install()
+#
+BiocManager::install()
+```
+
+
