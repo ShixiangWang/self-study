@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# 类的构造和属性
 
 class Presenter():
   def __init__(self, name):
