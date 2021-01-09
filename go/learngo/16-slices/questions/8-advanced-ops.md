@@ -1,10 +1,12 @@
 # Advanced Slice Operations Quiz
 
 ## What are the length and capacity of the 'part' slice?
+
 ```go
 lyric := []string{"show", "me", "my", "silver", "lining"}
 part  := lyric[1:3:5]
 ```
+
 1. Length: 1 - Capacity: 5
 2. Length: 1 - Capacity: 3
 3. Length: 3 - Capacity: 5
@@ -14,11 +16,13 @@ part  := lyric[1:3:5]
 
 
 ## What are the lengths and capacities of the slices below?
+
 ```go
 lyric := []string{"show", "me", "my", "silver", "lining"}
 part  := lyric[:2:2]
 part   = append(part, "right", "place")
 ```
+
 1. lyric's len: 5, cap: 5 — part's len: 5, cap: 5
 2. lyric's len: 3, cap: 1 — part's len: 2, cap: 3
 3. lyric's len: 5, cap: 5 — part's len: 4, cap: 4 *CORRECT*
@@ -28,6 +32,7 @@ part   = append(part, "right", "place")
 
 
 ## When you might want to use the make function?
+
 1. To preallocate a backing array for a slice with a definite length *CORRECT*
 2. To create a slice faster
 3. To use less memory
@@ -36,12 +41,14 @@ part   = append(part, "right", "place")
 
 
 ## What does the program print?
+
 ```go
 tasks := make([]string, 2)
 tasks  = append(tasks, "hello", "world")
 
 fmt.Printf("%q\n", tasks)
 ```
+
 1. ["" "" "hello" "world"] *CORRECT*
 2. ["hello" "world"]
 3. ["hello" "world" "" ""]
@@ -50,12 +57,14 @@ fmt.Printf("%q\n", tasks)
 
 
 ## What does the program print?
+
 ```go
 tasks := make([]string, 0, 2)
 tasks  = append(tasks, "hello", "world")
 
 fmt.Printf("%q\n", tasks)
 ```
+
 1. ["" "" "hello" "world"]
 2. ["hello" "world"] *CORRECT*
 3. ["hello" "world" "" ""]
@@ -64,6 +73,7 @@ fmt.Printf("%q\n", tasks)
 
 
 ## What does the program print?
+
 ```go
 lyric := []string{"le", "vent", "nous", "portera"}
 n := copy(lyric, make([]string, 4))
@@ -77,6 +87,7 @@ fmt.Printf("%d %q\n", n, lyric)
 //
 //      This is an optimization made by the Go compiler.
 ```
+
 1. 4 ["le" "vent" "le" "vent"]
 2. 4 ["le" "vent" "nous" "portera"]
 3. 4 ["" "" "" ""] *CORRECT*
@@ -120,9 +131,11 @@ fmt.Printf("%T", spendings[0][0])
 
 
 ## What is the 'element type' of the slice?
+
 ```go
 [][][3]int{{{10, 5, 9}}}
 ```    
+
 1. [][][3]int
 2. [][]int
 3. [][3]int *CORRECT*
