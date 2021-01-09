@@ -86,12 +86,14 @@ fmt.Printf("%d %q\n", n, lyric)
 
 
 ## What does the program print?
+
 ```go
 spendings := [][]int{{200, 100}, {}, {50, 25, 75}, {500}}
 total := spendings[2][1] + spendings[3][0] + spendings[0][0]
 
 fmt.Printf("%d\n", total)
 ```
+
 1. 725 *CORRECT*
 2. 650
 3. 500
