@@ -98,7 +98,7 @@ fmt.Printf("%d %q\n", n, lyric)
 
 ## What does the program print?
 
-```go
+```
 spendings := [][]int{{200, 100}, {}, {50, 25, 75}, {500}}
 total := spendings[2][1] + spendings[3][0] + spendings[0][0]
 
@@ -114,6 +114,7 @@ fmt.Printf("%d\n", total)
 
 
 ## What does the program print?
+
 ```go
 spendings := [][]int{{1,2}}
     
@@ -122,6 +123,7 @@ fmt.Printf("%T - ", spendings)
 fmt.Printf("%T - ", spendings[0])
 fmt.Printf("%T", spendings[0][0])
 ```
+
 1. [][]int{{1, 2}} - []int{1, 2} - int(2)
 2. [][]int - []int - int *CORRECT*
 3. []int - int - 2
