@@ -1,5 +1,7 @@
 # My Self-Study Room
 
+[![HitCount](https://hits.dwyl.com/ShixiangWang/self-study.svg)](https://hits.dwyl.com/ShixiangWang/self-study/)
+
 [点击查看直播计划](直播计划.md)
 
 ## Programming language based
