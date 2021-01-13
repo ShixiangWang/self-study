@@ -3,3 +3,4 @@ spider/bilibili/bilive/bilive
 .Rproj.user
 *.html
 .Rhistory
+*.o
