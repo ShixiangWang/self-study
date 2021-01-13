@@ -1,6 +1,6 @@
 # My Self-Study Room
 
-[![HitCount](https://hits.dwyl.com/ShixiangWang/self-study.svg)](https://hits.dwyl.com/ShixiangWang/self-study/)
+[![HitCount](http://hits.dwyl.com/ShixiangWang/self-study.svg)](http://hits.dwyl.com/ShixiangWang/self-study)
 
 [点击查看直播计划](直播计划.md)
 
