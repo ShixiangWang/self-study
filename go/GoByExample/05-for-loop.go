@@ -9,6 +9,7 @@ func main() {
 		i++
 	}
 
+	// Standard way
 	for j := 7; j <= 9; j++ {
 		fmt.Println("loop")
 	}

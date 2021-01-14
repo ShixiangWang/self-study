@@ -32,7 +32,7 @@ func main() {
 		fmt.Println("It's after noon")
 	}
 
-	// 类型开关 (type switch) 比较类型而非值。可以用来发现一个接口值的类型。
+	// 类型开关 (type switch) 比较类型而非值。可以用来确定一个接口值的类型。
 	whatAmI := func(i interface{}) {
 		switch t := i.(type) {
 		case bool:

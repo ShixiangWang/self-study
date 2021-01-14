@@ -18,6 +18,7 @@ func main() {
 	var e int
 	fmt.Println(e)
 
+	// 短声明赋值符号
 	f := "short"
 	fmt.Println(f)
 }
