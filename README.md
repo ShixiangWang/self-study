@@ -16,11 +16,14 @@
 
 - [Data science](data-science)
 - [Web](web)
+- [Spider](spider)  
 - [Hardware description language](hdl)
+- [Machine learning](ml)
 
 ## Field related
 
 - [Bioinformatics](bioinformatics)
+- [Cancer](cancer)
 
 ## Recommended materials
 
