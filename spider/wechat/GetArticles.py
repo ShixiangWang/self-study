@@ -44,12 +44,12 @@ if __name__ == '__main__':
 
     # 自定义爬取，每次爬取5篇以上
     start = 0
-    count = 10 # 不是每次得到的都一样
+    count = 5 # 不是每次得到的都一样
     time_delay = 60 * 3
 
     for i in range(100):
         if i != 0:
-            start += len(data)
+            start += 5
         print("===============")
         print("Query round: " + str(i))
         print("Start set to: %d" % start)
