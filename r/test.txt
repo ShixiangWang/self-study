@@ -1,0 +1,4 @@
+stu	score
+A	84
+B	32
+C	55
