@@ -8,6 +8,7 @@ func main() {
 	nums := []int{2, 3, 4}
 	sum := 0
 	// calculate Sum
+	// Just value
 	for _, num := range nums {
 		sum += num
 	}
@@ -40,5 +41,10 @@ func main() {
 	// Index, char
 	for i, c := range "gogo" {
 		fmt.Println(i, c)
+	}
+	// Chinese
+	for i, c := range "欢迎你" {
+		fmt.Println(i, c)
+		fmt.Printf("index = %d, val = %c \n", i, c)
 	}
 }
