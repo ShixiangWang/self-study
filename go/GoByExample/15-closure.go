@@ -4,6 +4,7 @@ import "fmt"
 
 // This function use
 // closure to hide the variable i
+// 用闭包做了一个计数器
 func intSeq() func() int {
 	i := 0
 	return func() int {

@@ -1,5 +1,7 @@
 package main
 
+// 递归
+
 import "fmt"
 
 func fact(n int) int {
@@ -9,6 +11,7 @@ func fact(n int) int {
 
 	return n * fact(n-1)
 }
+
 func main() {
 	fmt.Println(fact(7))
 }

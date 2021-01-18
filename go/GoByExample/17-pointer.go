@@ -15,9 +15,11 @@ func main() {
 	i := 1
 	fmt.Println("initial:", i)
 
+	// 传值
 	zeroval(i)
 	fmt.Println("zeroval:", i)
 
+	// 穿引用，即地址
 	zeroptr(&i)
 	fmt.Println("zeroptr:", i)
 

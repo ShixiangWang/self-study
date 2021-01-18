@@ -13,4 +13,9 @@ func main() {
 
 	_, c := vals()
 	fmt.Println(c)
+
+	// range 可以只接收 1 个参数
+	// 函数不行？
+	d, _ := vals()
+	fmt.Println(d)
 }

@@ -6,6 +6,10 @@ import (
 )
 
 type geometry interface {
+	// 一个类型只要实现了相应的函数，就
+	// 相当于实现了对应的接口
+	// 那这个类型就可以看作拥有一个
+	// 隐形的类型 geometry
 	area() float64
 	perim() float64
 }
