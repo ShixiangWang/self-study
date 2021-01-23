@@ -18,6 +18,7 @@
 - [Web](web)
 - [Spider](spider)  
 - [Hardware description language](hdl)
+- [Algorithm](algo)
 - [Machine learning](ml)
 
 ## Field related
