@@ -33,26 +33,21 @@
 
 ## My videos
 
-<iframe src="//player.bilibili.com/player.html?aid=883301196&bvid=BV16K4y1t7VD&cid=193603100&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+- [我理解的生信核心要点](https://www.bilibili.com/video/BV16K4y1t7VD)
+- [R 和 RStudio的安装与配置](https://www.bilibili.com/video/BV1d5411G7U5)
+- [R 程序控制与数据操作流](https://www.bilibili.com/video/BV1Ua4y1e7or)
+- [Tidyverse 实战批量建模可视化](https://www.bilibili.com/video/BV1hg4y1q7xc)
+- [R 包开发](https://www.bilibili.com/video/BV1ST4y1J7Ai)
+- [ggplot2 介绍和解读](https://www.bilibili.com/video/BV1wk4y1m7rn)
+- [Markdown 与 RMarkdown 最佳入口](https://www.bilibili.com/video/BV1pk4y117Ng)
+- [介绍和模拟 GitHub 多人协作代码提交与冲突解决](https://www.bilibili.com/video/BV1n54y1B7aQ)
+- [使用blogdown搭建个人博客](https://www.bilibili.com/video/BV13v41147BH)
 
-<iframe src="//player.bilibili.com/player.html?aid=668320105&bvid=BV1Ua4y1e7or&cid=197293837&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 
-<iframe src="//player.bilibili.com/player.html?aid=838545240&bvid=BV1hg4y1q7xc&cid=204341210&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+#### 直播学习视频系列：R 语言数据科学导论
 
-<iframe src="//player.bilibili.com/player.html?aid=926149506&bvid=BV1ST4y1J7Ai&cid=206167267&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+- [01 介绍与 R 基础语法](https://www.bilibili.com/video/BV1Ey4y1e71P)
+- [02 R 的数据结构和编码风格](https://www.bilibili.com/video/BV1JV411t76E)
+- [03 数据分析基础](https://www.bilibili.com/video/BV1iV411t7MH)
+- [04 统计分析基础](https://www.bilibili.com/video/BV1zp4y1W778)
 
-<iframe src="//player.bilibili.com/player.html?aid=753990999&bvid=BV1wk4y1m7rn&cid=214194321&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<iframe src="//player.bilibili.com/player.html?aid=754708687&bvid=BV1pk4y117Ng&cid=239539580&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<iframe src="//player.bilibili.com/player.html?bvid=BV1n54y1B7aQ&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<iframe src="//player.bilibili.com/player.html?bvid=BV1d5411G7U5&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<iframe src="//player.bilibili.com/player.html?bvid=BV13v41147BH&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<iframe src="//player.bilibili.com/player.html?bvid=BV1Ey4y1e71P&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<iframe src="//player.bilibili.com/player.html?bvid=BV1JV411t76E&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
-<iframe src="//player.bilibili.com/player.html?aid=416177666&bvid=BV1iV411t7MH&cid=283335785&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
