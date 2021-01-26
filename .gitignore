@@ -4,3 +4,4 @@ spider/bilibili/bilive/bilive
 *.html
 .Rhistory
 *.o
+.Rhistory

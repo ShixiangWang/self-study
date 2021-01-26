@@ -7,7 +7,7 @@ func ping(pings chan<- string, msg string) {
 }
 
 func pong(pings <-chan string, pongs chan<- string) {
-	msg := <- pings
+	msg := <-pings
 	pongs <- msg
 }
 
