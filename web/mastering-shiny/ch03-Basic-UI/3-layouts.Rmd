@@ -1,0 +1,228 @@
+# 布局
+
+在我们知道如何创建一系列输入和输出控件之后，我们需要学会如何在一个页面中对它们进行排列，以达到比较好的展示效果。这正是布局函数的工作，布局函数提供了一个应用高层次的可视化结构。
+
+这篇文章的内容聚焦于 `fluidPage()` 函数，它提供了大多数应用使用的布局风格。在未来的文章中我们将讨论布局函数家族的其他成员，如仪表盘、对话框。
+
+依旧先载入 Shiny。
+
+```r
+library(shiny)
+```
+
+## 概览
+
+Shiny 应用布局由层次函数调用创建，其中 R 中的层次结构与输出中的层次结构匹配。当你看到下面这样的复杂布局代码时：
+
+```r
+ui = fluidPage(
+  titlePanel("Hello Shiny!"),
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("obs", "Observations:", min = 0, max = 1000, value = 500)
+    ),
+    mainPanel(
+      plotOutput("distPlot")
+    )
+  )
+)
+```
+
+首先关注于它层次的函数调用：
+
+```r
+fluidPage(
+  titlePanel(),
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("obs")
+    ),
+    mainPanel(
+      plotOutput("distPlot")
+    )
+  )
+)
+```
+
+就算读者完全不懂布局函数任何的知识点，相信通过扫读上面的函数名也会对该页面布局有一个比较准确的猜测：顶部是标题栏，然后是侧边栏（包含滑块），主面板包含图。
+
+看看是不是下面这样？
+
+```r
+server = function(input, output, session) {
+
+}
+
+shinyApp(ui, server)
+```
+
+似乎没有看到主面板？这是当前没有后端绘图函数的加持，页面只展示了侧边栏的结果。
+
+我们还是先了解下更多的布局知识。
+
+## 页面函数
+
+最重要的布局函数是上面已经展示过的 `fluidPage()`，我们使用它将多个输入和输出控件组合形成一个 Shiny 应用。如果我们仅使用 `fluidPage()` 会是怎样的？
+
+![](https://d33wubrfki0l68.cloudfront.net/ad1d199cecafc2c2be10425930b1dcfb5e8dd5d7/46916/images/basic-app/fluid-page.png)
+
+没有任何内容，看起来枯燥无味吧？实际上，`fluidPage()` 在后台做了很多重要的工作。这个页面函数设置了 Shiny 所需的所有 HTML、CSS 和 JS，它使用了一个称为 **Bootstrap** 的布局系统（<https://getbootstrap.com/>），该系统提供了非常有吸引力的初始设定。
+
+理论上讲，`fluidPage()` 包含了我们创建 Shiny 应用布局的一切，我们可以将之前学习过的各种输入输出控件扔进去。当然，想真正创建一个好的应用是远远不够，我们需要学习更多的布局函数。
+
+接下来，我将给读者介绍 2 个通用的页面结构：带侧边栏的页面和多行页面。
+
+## 带侧边栏的页面
+
+结合 `sidebarLayout()` 和 `titlePanel()`、`sidebarPanel()` 和 `mainPanel()`，我们可以轻易创建一个 2 列布局的页面，左侧显示输入，右侧显示输出。
+
+基本的代码如下：
+
+```r
+fluidPage(
+  titlePanel(
+    # 应用标题和描述
+  ),
+  sidebarLayout(
+    sidebarPanel(
+      # 输入
+    ),
+    mainPanel(
+      # 输出
+    )
+  )
+)
+```
+
+对应的页面结构如下：
+
+![带侧边栏 Shiny 应用的基本布局](https://d33wubrfki0l68.cloudfront.net/bb7351f4082fffdad9e4c199bc12190d104898cb/e2ac8/diagrams/basic-ui/sidebar.png)
+
+下面是一个使用布局函数的简单实例，它用于演示中心极限定理。
+
+```r
+ui <- fluidPage(
+  headerPanel("Central limit theorem"),
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("m", "Number of samples:", 2, min = 1, max = 100)
+    ),
+    mainPanel(
+      plotOutput("hist")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  output$hist <- renderPlot({
+    means <- replicate(1e4, mean(runif(input$m)))
+    hist(means, breaks = 20)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/a3c6cfafe8e207655a8166c64780151c3bfa0c86/39327/screenshots/basic-ui/sidebar.png)
+
+## 多行页面
+
+从实现上讲，`sidebarLayout()` 是基于一个灵活的多行布局之上构建的。这个多行页面布局可以用于创建视觉上更加复杂的应用。
+
+同上，我们以 `fluidPage()` 起始，然后使用 `fluidRow()` 创建行，使用 `column()` 创建列。
+
+下面是一个模板代码：
+
+```r
+fluidPage(
+  fluidRow(
+    column(4, 
+      ...
+    ),
+    column(8, 
+      ...
+    )
+  ),
+  fluidRow(
+    column(6, 
+      ...
+    ),
+    column(6, 
+      ...
+    )
+  )
+)
+```
+
+![多行页面结构](https://d33wubrfki0l68.cloudfront.net/bb9dffe04f31627d7eb552b73227f7315ca20585/de3d9/diagrams/basic-ui/multirow.png)
+
+细心的读者可能注意到了每一行的总宽是 12，这是 Shiny 设定的，我们可以在此基础上使用不同宽度的组合。
+
+## 主题
+
+创建一个好看的主题通常需要花费大量时间，作为初学者的我们应该关注内容和页面。 Shiny 提供了自带的一系列主题可以自由选择，减少我们对于主题的工作。下面代码展示了 4 个基本的主题。
+
+```r
+theme_demo <- function(theme) {
+  fluidPage(
+    theme = shinythemes::shinytheme(theme),
+    sidebarLayout(
+      sidebarPanel(
+        textInput("txt", "Text input:", "text here"),
+        sliderInput("slider", "Slider input:", 1, 100, 30)
+      ),
+      mainPanel(
+        h1("Header 1"),
+        h2("Header 2"),
+        p("Some text")
+      )
+    )
+  )
+}
+
+
+ui = theme_demo("darkly")
+shinyApp(ui, server)
+ui = theme_demo("flatly")
+shinyApp(ui, server)
+ui = theme_demo("sandstone")
+shinyApp(ui, server)
+ui = theme_demo("united")
+shinyApp(ui, server)
+```
+
+
+![](https://d33wubrfki0l68.cloudfront.net/2ef0afc4700714f27c7ae8b3a1b6c5ff216ccd92/72e44/screenshots/basic-ui/theme-united.png)
+
+目前的操作很简单吧，只是在 `fluidPage()` 中设置 `theme` 参数。
+
+> 读者可以通过 <https://shiny.rstudio.com/gallery/shiny-theme-selector.html> 查看更多的 Shiny 主题并查看效果。
+
+## 技术实现
+
+可能会有读者惊讶我们上面使用了一个 R 函数 `theme_demo()` 来创建 Shiny 的 UI。
+这样可行的原因是**Shiny 代码本质上就是 R 代码**，读者可以使用 R 中已知的任何工具增强效率、减少重复。请谨记**三**的原则：**当你拷贝和粘贴代码超过 3 次，就应该考虑编写一个函数或者 for 循环**。
+
+所有的输入、输出、布局函数都返回 HTML，如果我们从 R 的控制台运行下面的代码就会看到返回的 HTML 内容。
+
+```r
+fluidPage(
+  textInput("name", "What's your name?")
+)
+```
+
+输出：
+
+```html
+<div class="container-fluid">
+  <div class="form-group shiny-input-container">
+    <label for="name">What's your name?</label>
+    <input id="name" type="text" class="form-control" value=""/>
+  </div>
+</div>
+```
+
+
+Shiny 就是这样设计的。作为一名 R 的使用者，我们并不需要关注和学习 HTML 细节。但你如果已经掌握了网页编程的知识，那么你将更加容易学习、理解相关知识，直接使用 HTML 标签实现你想要创建的任意自定义内容。
+
+

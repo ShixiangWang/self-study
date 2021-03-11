@@ -1,0 +1,124 @@
+# 输出控件
+
+UI 中的输出控件创建了占位符，它随后被后端函数生成的内容所填充。
+与输入控件一样，输出控件的第 1 个参数也是一个唯一的 ID：
+**如果你的 UI 有一个输入控件的 ID 是 `"plot"`，那么你可以在后端中使用 `output$plot` 访问它**。
+
+前端中每一个输出控件函数对与后端的一个 `render` 函数对应。
+Shiny 中有 3 类输出控件，对应你报告中经常会使用到的文本、表格和图形。
+
+下面将向读者介绍前端输出控件的基础，以及与之相连的 `render` 函数。
+
+首先载入 Shiny。
+
+```r
+library(shiny)
+```
+
+## 文本
+
+使用 `textOutput()` 和 `verbatimTextOutput()` 分别输出普通文本和固定的代码及控制台输出。
+
+```r
+ui <- fluidPage(
+  textOutput("text"),
+  verbatimTextOutput("code")
+)
+server <- function(input, output, session) {
+  ## 对应 textOutput()
+  output$text <- renderText({ 
+    "Hello friend!" 
+  })
+  ## 对应 verbatimTextOutput()
+  output$code <- renderPrint({ 
+    summary(1:10) 
+  })
+}
+
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/61f37c119d66f0b25bb834d6773274856b764727/6beee/screenshots/basic-ui/output-text.png)
+
+注意，render 函数中的 `{}` 应对单行代码是非必须的。后端函数写为如下的形式显得更加紧凑。
+
+```r
+server <- function(input, output, session) {
+  output$text <- renderText("Hello friend!")
+  output$code <- renderPrint(summary(1:10))
+}
+```
+
+另外，这里两个 `render*` 函数的区别是：
+
+- `renderText()` 显示代码**返回**的文本。
+- `renderPrint()` 显示代码**打印**的文本。
+
+为了帮助读者理解它们的区别，我们看下下面这个函数。该函数打印 `a` 和 `b`，并返回 `"c"`。 R 中一个函数能够打印很多的东西，但只能返回单个值。
+
+```r
+print_and_return <- function() {
+  print("a")
+  print("b")
+  "c"
+}
+x <- print_and_return()
+#> [1] "a"
+#> [1] "b"
+x 
+#> [1] "c"
+```
+
+## 表格
+
+Shiny 中有两个办法以表格的形式展示数据框。
+
+- `tableOutput()` 和 `renderTable()` 生成一个静态的数据表，一次性展示所有的数据。
+- `dataTableOutput()` 和 `renderDataTable()` 生成一个动态表格，展示一个固定行数的表格以及相关的控件。
+
+`tableOutput()` 对于小的、固定的汇总（如模型系数）非常有用，而 `dataTableOutput()` 更适用于你想要将完整的数据呈现给用户。
+
+```r
+ui <- fluidPage(
+  tableOutput("static"),
+  dataTableOutput("dynamic")
+)
+server <- function(input, output, session) {
+  output$static <- renderTable(head(mtcars))
+  output$dynamic <- renderDataTable(mtcars, options = list(pageLength = 5))
+}
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/2fe4c674645896fa18d345ad162f479434746dd2/78343/screenshots/basic-ui/output-table.png)
+
+
+## 图
+
+任何类型的 R 图（基础、ggplot2 或其他）读者都可以使用 `plotOutput()` 和 `renderPlot()`：
+
+```r
+ui <- fluidPage(
+  plotOutput("plot", width = "400px")
+)
+server <- function(input, output, session) {
+  output$plot <- renderPlot(plot(1:5))
+}
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/2bc961497fb491d1fc1ace9f30e06245aca0da67/daa6c/screenshots/basic-ui/output-plot.png)
+
+图形有些特殊，它们既可以作为输出也可以作为输出控件。
+`plotOutput()` 有一些像 `click`、`dbclick` 和 `hover` 这样的参数。
+如果指定 `click = "plot_click"`，Shiny 会创建一个响应的输入 `input$plot_click`，利用它我们可以让图形产生交互性。
+
+## 下载
+
+读者可以使用 `downloadButton()` 或 `downloadlink()` 创建下载功能，但它们需要后端新的技术支撑，后面我们再进行学习。
+
+> 如果读者现在恰好想要实现该功能，请参考 https://github.com/rstudio/shiny-examples/tree/master/010-download 提供的模板。
+

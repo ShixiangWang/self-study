@@ -1,0 +1,64 @@
+# 使用响应式编程
+
+前面展示的代码虽然简单，但我们依然使用了重复的语句：
+
+```r
+dataset <- get(input$dataset, "package:datasets")
+```
+
+无论什么编程语言，重复都是不好的：
+
+1. 浪费资源
+2. 增加维护和调试成本
+
+在传统 R 编程中，我们使用两个技术处理重复代码：
+
+1. 使用变量保存值
+2. 使用函数保存计算
+
+但是它们都无法处理此处的代码重复问题，我们需要引入新的技术：**响应式编程**。
+
+响应式编程是以 `reactive({...})` 包裹的代码块，可以将结果赋值给一个变量，然后我们可以像使用函数一样
+使用这个变量。它的一个重要特点是除了第一次运行，之后它只会在值更新时才运行（有变化，才响应进行改变）。
+
+我们会在以后更加详细地介绍它，现在而言，我们已经构建了一个不错的简单 Shiny 应用。
+
+下面代码的运行结果与之前的文章类似，但更有效率。
+
+```r
+library(shiny)
+
+ui = fluidPage(
+  selectInput("dataset", label = "Dataset",
+              choices = ls("package:datasets")),
+  verbatimTextOutput("summary"),
+  tableOutput("table")
+)
+
+
+server <- function(input, output, session) {
+  # reactive is a new approach
+  # variable or function cannot work here
+  dataset <- reactive({
+    get(input$dataset, "package:datasets", inherits = FALSE)
+  })
+  
+  output$summary <- renderPrint({
+    summary(dataset())
+  })
+  
+  output$table <- renderTable({
+    dataset()
+  })
+}
+
+shinyApp(ui, server)
+
+```
+
+### 资料
+
+来自 RStudio 的 Shiny 小抄（百度云）：
+
+- 链接：https://pan.baidu.com/s/19i-XuMrs70x7Tin_r89ZkA 
+- 提取码：yfuf

@@ -1,0 +1,237 @@
+# 用户界面之输入
+
+> 再次提醒读者，该系列的内容源自 Hadley 编写的《Mastering Shiny》喔。
+> 中文由我根据其内容精简后所写。
+> 如果想要提前学习，请访问 <https://mastering-shiny.org/>
+
+前面几篇文章我们构建了一个简易的 Shiny 应用，
+如果我们仔细观察过没有几行的实现代码就知道 Shiny 将
+前端（实现用户界面）和后端（服务逻辑）进行了分离，
+这让我们可以比较独立地来看待它们。接下来的几篇文章
+会关注前端，探索 Shiny 提供的 HTML 输出、输出和页面布局功能。
+
+首先依旧载入 Shiny。
+
+```r
+library(shiny)
+```
+
+## 输入控件的通用结构
+
+所有的输入（控件）函数第 1 个参数都是相同的 `inputId`。
+它是用来连接前端和后端的标识符（ID）：**如果你的 UI 有一个输入控件的 ID 是 `"name"`，那么你可以在后端中使用 `input$name` 访问它**。
+
+`inputId` 有两处限制：
+
+- 必须是合法的变量名。
+- 必须唯一。
+
+大多数的输入函数的第 2 个参数是 `label`，它用于为控件创建可读的标签。
+它就没有限制了，尽量让大家看得懂该控件得含义即可。
+
+第 3 个参数一般是 `value`，它用于设定默认的控件值。
+
+其他的参数一般每个控件都不太相同，需要根据情况和文档说明进行设定。
+
+根据上面的介绍，我们一般在实际使用时会忽略第一个和第二个参数名，如：
+
+```r
+sliderInput("min", "Limit (minimum)", value = 50, min = 0, max = 100)
+```
+
+下面将大体根据创建的控件类型介绍内建于 Shiny 包的输入控件函数，目的时帮助各位读者快速地对整体的功能有所了解，而不是详细地描述所有的参数。如果你想要了解每个输入函数的详情，请阅读相应的函数文档。
+
+
+## 自由文本
+
+这里介绍 3 个函数用于文本的输入。
+
+```r
+ui = fluidPage(
+  ## 适用于少量文本
+  textInput("name", "What's your name?"),
+  ## 适用于密码
+  passwordInput("password", "What's your password?"),
+  ## 适用于成段文本
+  textAreaInput("story", "Tell me about yourself", rows = 3, cols = 80)
+)
+
+server = function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/7d05eded3bee980b9e441f8638890258c45e81b9/a2aaf/screenshots/basic-ui/free-text.png)
+
+如果你想要确保文本含有指定的属性，可以使用 `validate()` 函数（后续内容会介绍）。
+
+## 数值输入
+
+如果想要收集数值型数据，使用 `sliderInput()` 创建 1 个滑块，或使用 `numericInput()` 创建一个受限文本框。当 `silerInput()` 的 `value` 参数值长度为 2 时，会产生一个范围滑块。
+
+```r
+ui = fluidPage(
+  ## 创建
+  numericInput("num", "Number one", 
+               value = 0, min = 0, max = 100),
+  ## 创建简单滑块
+  sliderInput("num2", "Number two",
+              value = 50, min = 0, max = 100),
+  ## 创建范围滑块
+  sliderInput("rng", "Range", 
+              value = c(10, 20), min = 0, max = 100)
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/ba6c90aecddbd0d3df1c366f482f124fe7c6aba3/603a2/screenshots/basic-ui/numeric.png)
+
+一般当数值不那么重要时使用滑块，因为滑动选择一个指定值的体验比较糟糕。
+
+自定义滑块，请阅读：<https://shiny.rstudio.com/articles/sliders.html>
+
+## 日期
+
+使用 `dataInput()` 创建单个日期，使用 `dateRangeInput()` 创建日期范围。
+参数 `datesdisabled` 和 `daysofweekdisabled` 允许我们对合理输入进行限制。
+
+```r
+ui = fluidPage(
+  ## 创建单个日期
+  dateInput("dob", "When were you born?"),
+  ## 创建日期范围
+  dateRangeInput("holiday", "When do you want to go on vacation next?")
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/eb6baa615a5c8d19a871626d6ce021bb1376f0a1/814a6/screenshots/basic-ui/date.png)
+
+默认的日期格式、语言等使用的是美国标准，它们可以通过参数 `format`、`language`和 `weekstart` 等进行修改。
+
+```r
+ui = fluidPage(
+  dateInput("dob", "When were you born?", language = "zh-CN"),
+  dateRangeInput("holiday", "When do you want to go on vacation next?", language = "zh-CN")
+)
+
+shinyApp(ui, server)
+```
+
+## 选择列表
+
+`selectInput()` 和 `radioButtons()` 是两种不同的创建选择列表方法。
+
+```r
+animals = c("dog", "cat", "mouse", "bird", "other", "I hate animals")
+
+ui = fluidPage(
+  selectInput("state", "What's your favourite state?", choices = state.name),
+  radioButtons("animal", "What's your favourite animal?", choices = animals)
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/2605fed791b02e16d28d2c389df9130d349bf1b3/e49e2/screenshots/basic-ui/limited-choices.png)
+
+单选按钮有两个很好的特点：
+
+- 展示了所有可能选项，非常适用于短列表
+- 可以展示非文字的内容，如表情
+
+```r
+ui = fluidPage(
+  radioButtons("rb", "Choose one:",
+               choiceNames = list(
+                 icon("angry"),
+                 icon("smile"),
+                 icon("sad-tear")
+               ),
+               choiceValues = list("angry", "happy", "sad")
+  )
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/dbe9e03aec37653f1244e95edf4f29c48135bfa5/e7044/screenshots/basic-ui/radio-icon.png)
+
+使用 `selectInput()` 创建的下拉列表由于所占的空间固定，非常适用于长列表。如果设定了 `multiple = TRUE`，还支持多选。
+
+```r
+ui <- fluidPage(
+  selectInput(
+    "state", "What's your favourite state?", 
+    choices = state.name,
+    multiple = TRUE
+  )
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/c53795ad09b7866f0ed7adc1b3adabdd6fc120db/437be/images/basic-ui/multi-select.png)
+
+如果想要使用按钮创建多选列表，需要用到 `checkboxGroupInput()`。
+
+```r
+ui = fluidPage(
+  checkboxGroupInput("animal", "What's your favourite animal?", 
+                     choices = animals)
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/d3d61d703bac03a0d2823da98e2dbba03d6619d4/3276f/screenshots/basic-ui/multi-radio.png)
+
+如果你想要一个应对 Yes/No 问题的复选框，使用 `checkboxInput()`。
+
+```r
+ui = fluidPage(
+  checkboxInput("cleanup", "Clean up?", value = TRUE),
+  checkboxInput("shutdown", "Shutdown?")
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/ff021265e68d432ea7e3e574849a8f6a8f25b9b0/8dec7/screenshots/basic-ui/yes-no.png)
+
+## 文件上传
+
+使用 `fileInput()` 设定文件上传。
+
+```r
+ui = fluidPage(
+  fileInput("upload", NULL)
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/92e2422e9b00cec1d6a852cbdb484071ce51ae4e/dacfd/screenshots/basic-ui/upload.png)
+
+文件上传需要后端进行特殊的处理，这会在后面的内容中介绍。
+如果你里面想要用到它，不妨参考 <https://github.com/rstudio/shiny-examples/blob/master/009-upload/app.R> 提供的示例 Shiny App。
+
+
+## 动作按钮
+
+该特性使用 `actionButton()` 或 `actionLink()` 实现，它一般配对后端的 `observeEvent()` 或 `eventReactive()` 使用，后续介绍。
+
+```r
+ui = fluidPage(
+  actionButton("click", "Click me!"),
+  actionButton("drink", "Drink me!", icon = icon("cocktail"))
+)
+
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/91ce7a6b83974609e9838c57019645f25b8fd2cd/8a1d2/screenshots/basic-ui/action.png)

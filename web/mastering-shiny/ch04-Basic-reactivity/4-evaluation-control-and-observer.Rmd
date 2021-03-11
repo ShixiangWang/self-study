@@ -1,0 +1,204 @@
+# 响应式编程基础（四） - 执行时间控制与观察器
+
+我们通过前面的文章已经对响应式编程的基本思路有所熟悉，这里我们将讨论更加高级的技术，它可以让我们更加合理地使用响应表达式。
+
+为了更好地探索技术的基本思路，这里先对之前创建的模拟 Shiny 应用进行简化。我们将使用只有一个参数的分布，并让分布的样本数 `n` 保持一致。另外，我们也将移除图形控制。这样，我们用下面代码生成一个更小的 UI 和后端。
+
+```r
+library(shiny)
+library(ggplot2)
+
+## 绘图函数
+histogram <- function(x1, x2, binwidth = 0.1, xlim = c(-3, 3)) {
+  df <- data.frame(
+    x = c(x1, x2),
+    g = c(rep("x1", length(x1)), rep("x2", length(x2)))
+  )
+
+  ggplot(df, aes(x, fill = g)) +
+    geom_histogram(binwidth = binwidth) +
+    coord_cartesian(xlim = xlim)
+}
+
+## 用户界面
+ui <- fluidPage(
+  fluidRow(
+    column(3, 
+      numericInput("lambda1", label = "lambda1", value = 3),
+      numericInput("lambda2", label = "lambda2", value = 3),
+      numericInput("n", label = "n", value = 1e4, min = 0)
+    ),
+    column(9, plotOutput("hist"))
+  )
+)
+
+## 后端
+server <- function(input, output, session) {
+  x1 <- reactive(rpois(input$n, input$lambda1))
+  x2 <- reactive(rpois(input$n, input$lambda2))
+  output$hist <- renderPlot({
+    histogram(x1(), x2(), binwidth = 1, xlim = c(0, 40))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+生成的 Shiny 如下：
+
+![一个绘制两个泊松分布的简易 Shiny](https://d33wubrfki0l68.cloudfront.net/f3dfe3da3a8720de2669aaf01aaadb3c0a908b26/cf8de/screenshots/basic-reactivity/simulation-2.png)
+
+对应的响应图如下：
+
+![响应图](https://d33wubrfki0l68.cloudfront.net/7adbf09a951fabbc162541ad2e0fed7975e54a3c/c38c4/diagrams/basic-reactivity/timing.png)
+
+## 定时失效
+
+想象一下你想要让这个应用持续不断地生成模拟数据，以便于你可以看到一个动态模拟而不是一个静态地图。我们可以使用一个新的函数 `reactiveTimer()` 来增加更新的频率。
+
+`reactiveTimer()` 是一个响应表达式，它有一个隐藏的输入：当前时间。该函数用于改变当前的更新定时。例如，下面代码使用了 500ms 作为更新间隔（2 次/秒）。这个速度已经足够的快，但也不至于让我们感到眩晕。
+
+```r
+server <- function(input, output, session) {
+  timer <- reactiveTimer(500)
+  
+  x1 <- reactive({
+    timer()
+    rpois(input$n, input$lambda1)
+  })
+  x2 <- reactive({
+    timer()
+    rpois(input$n, input$lambda2)
+  })
+  
+  output$hist <- renderPlot({
+    histogram(x1(), x2(), binwidth = 1, xlim = c(0, 40))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+它对应的响应图如下：
+
+![引入一个自动每半秒更新的输入依赖](https://d33wubrfki0l68.cloudfront.net/6ad166ae11953c0ae612b56541e08bdfafd00bec/f7321/diagrams/basic-reactivity/timing-timer.png)
+
+这里注意在计算 `x1()` 和 `x2()` 的响应表达式中使用 `timer()` 的方法：我们调用它，但不需要使用它的返回值。
+
+## 点击时更新
+
+在上面的场景中，思考一下如果代码本身的运行需要花费 1 秒钟会发生什么事情？由于我们每 0.5 秒自动更新数据的模拟，Shiny 会产生越来越多未能完成的工作，因此永远也无法处理完。相同的问题在你 Shiny 用户快速点击需要长时间运行的功能时也会出现。这些都可能会对 Shiny 造成很大的压力，而且当它处理这些挤压工作时，它无法对新的请求发出响应。最后，造成很差的用户体验。
+
+这种问题出现时，我们一般会想要用户手动点击按钮来运行计算。这就是 `actionButton()` 的绝佳使用场景：
+
+```r
+ui <- fluidPage(
+  fluidRow(
+    column(3, 
+      numericInput("lambda1", label = "lambda1", value = 3),
+      numericInput("lambda2", label = "lambda2", value = 3),
+      numericInput("n", label = "n", value = 1e4, min = 0),
+      # 增加一个按钮
+      actionButton("simulate", "Simulate!")
+    ),
+    column(9, plotOutput("hist"))
+  )
+)
+```
+
+为了使用上面设置的按钮，我们需要学习一个新的工具。想要知道为什么，我们先使用和上面相同的方法创建 Shiny，直接使用 `simulate` 为响应表达式引入依赖。
+
+```r
+server <- function(input, output, session) {
+  x1 <- reactive({
+    input$simulate
+    rpois(input$n, input$lambda1)
+  })
+  x2 <- reactive({
+    input$simulate
+    rpois(input$n, input$lambda2)
+  })
+  output$hist <- renderPlot({
+    histogram(x1(), x2(), binwidth = 1, xlim = c(0, 40))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+该代码生成了一个带按钮的 Shiny。
+
+![带按钮的应用](https://d33wubrfki0l68.cloudfront.net/e6288d0f8d6ed01f803318168e3fa4029ba3fa9e/920a6/screenshots/basic-reactivity/action-button.png)
+
+它对应的响应图如下：
+
+![引入按钮的响应图](https://d33wubrfki0l68.cloudfront.net/0d216624a9af4453f1aab3d6ed376b8afa10510f/d2723/diagrams/basic-reactivity/timing-button.png)
+
+这个 Shiny 初看实现了我们的目标，点击按钮就可以重新生成模拟数据。**然而，当其他输入变化时，结果也马上变化了**！响应图也显示了这一点。我们仅仅是引入了新的依赖，而我们实际想要做的是取代之前的依赖。
+
+为了解决这个问题，我们需要一个新的工具：**它可以使用输入控件但不施加响应依赖**。
+`eventReactive()` 正是我们需要的，它有两个参数，第 1 个指定了运行的依赖，第二个指定执行的表达式。
+
+让我们来改造下上面的 `server` 函数：
+
+```r
+server <- function(input, output, session) {
+  x1 <- eventReactive(input$simulate, {
+    rpois(input$n, input$lambda1)
+  })
+  x2 <- eventReactive(input$simulate, {
+    rpois(input$n, input$lambda2)
+  })
+
+  output$hist <- renderPlot({
+    histogram(x1(), x2(), binwidth = 1, xlim = c(0, 40))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+这样，`x1` 将依赖于 `simulate`，而不依赖于 `n` 和 `lambda1`，`x2` 同样如此。
+
+新的响应图如下：
+
+![](https://d33wubrfki0l68.cloudfront.net/f791a7f05e9462693076dcfee020a8bc39749d8c/bd18a/diagrams/basic-reactivity/timing-button-2.png)
+
+灰色箭头显示了 `x1` 或 `x2` 需要更新时它的计算依赖，但灰色箭头源头指向的参数已经不再是它的更新依赖，它们被 `simulate` 替换了!
+
+## 观察器 observer
+
+目前为止，我们关注的都是在应用内部发生的事情。但有时候我们需要在应用的外部做一些工作，如保存文件到一个共享网盘、发送数据到一个 Web API、更新数据库或向控制台打印调试信息。这些动作都不会影响我们应用的外观，因此我们不能使用输出和 `render` 函数。相反，我们需要使用观察器 **observer**。
+
+创建 observer 的方式有多种，这里我们看一下如何使用 `observeEvent()`，它是初学者一个重要的调试工具。
+
+`observeEvent()` 与 `eventReactive()` 非常相似。它有 2 个重要的参数：`eventExpr` 和 `handleExpr()`。第 1 个参数是依赖的输入和表达式，第 2 个参数是要运行的代码。例如：下面对于 `server()` 的修改意味着每次 `name` 更新时，都会向控制台发送一条消息。
+
+```r
+server <- function(input, output, session) {
+  text <- reactive(paste0("Hello ", input$name, "!"))
+  
+  output$greeting <- renderText(text())
+  observeEvent(input$name, {
+    message("Greeting performed")
+  })
+}
+```
+
+`observeEvent()` 和 `eventReactive()` 有两点重要的区别：
+
+- 我们不能将 `observeEvent()` 的结果赋值给一个变量
+- 我们不能从其他响应表达式中指向它
+
+观察器和输出非常相关。我们可以认为输出有一个特殊的副作用：更新用户浏览器的 HTML。
+为了强调这种紧密性，我们将使用响应图相同的方式绘制它。如下图所示：
+
+![观察器看起来与输出控件相同](https://d33wubrfki0l68.cloudfront.net/2f89d26c51a6012a942364ca25159d29df2de50d/d0ba0/diagrams/basic-reactivity/graph-3.png)
+
+
+此处结束我们的**响应式编程**之旅。接下来的文章将通过创建一个大型的数据分析 Shiny 进行实战。
+
+
+
+
+

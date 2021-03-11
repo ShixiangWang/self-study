@@ -1,0 +1,159 @@
+# 响应式编程基础（二） - 响应式编程
+
+一个网页应用仅有输入控件或输出控件无疑是枯燥的。Shiny 真正的魔法在于它同时包含两者。
+
+
+下面看一个简单例子：
+
+```r
+library(shiny)
+
+ui <- fluidPage(
+  textInput("name", "What's your name?"),
+  textOutput("greeting")
+)
+
+server <- function(input, output, session) {
+  output$greeting <- renderText({
+    paste0("Hello ", input$name, "!")
+  })
+}
+
+shinyApp(ui, server)
+```
+
+通过下面的截图我们观察向该应用输入时产生的变化。
+
+![](https://d33wubrfki0l68.cloudfront.net/a86c6d3163a798bc0dcaf8dc12cf25951ff1df36/64612/screenshots/basic-reactivity/connection-1.png)
+![](https://d33wubrfki0l68.cloudfront.net/25d7fea6d0b5dc9d5eabb7805b9fa9ffeb44f924/6dec1/screenshots/basic-reactivity/connection-2.png)
+![](https://d33wubrfki0l68.cloudfront.net/c3fe8884ae913b7b332321241d000fa76b7d3538/8719c/screenshots/basic-reactivity/connection-3.png)
+![](https://d33wubrfki0l68.cloudfront.net/df6040074837f5f6411dfe5a29d40b6d3d37e2d4/a16c5/screenshots/basic-reactivity/connection-4.png)
+
+
+我们可以看到，让我们在更新键入时，结果也实时地进行了更新。这是 Shiny 一个思想：我们不需要告诉它那个输出需要更新，Shiny 会自己为我们处理好这个问题。
+
+那它是如何工作地呢？让我们进一步思考一下下面这个代码：
+
+
+```r
+output$greeting <- renderText({
+  paste0("Hello ", input$name, "!")
+})
+```
+
+代码可以很容易理解为将 hello 和用户输入粘贴到一起，然后发送给 `output$greeting`。但这样理解是有一些问题的，想象一下，如果代码真的是这样工作的，那么该代码仅仅会运行一次。然而我们在页面每一次键入都会引起 Shiny 的反应，所以 Shiny 内部必然做了更多的工作。
+
+**应用的工作原理是代码不是告诉 Shiny 创建字符串然后发送到浏览器，相反，它告知Shiny 需要时该如何创建这个字符串。代码什么时候运行取决于 Shiny。它可能在应用启动时运行，可能后面再运行，可能运行很多次，可能根本不运行。这并不是说 Shiny 很任性，而是说 Shiny 负责决定代码什么时候运行，而不是我们**。更准确地说，**我们编写应用是为 Shiny 提供食谱，而不是指令**。
+
+## 命令式编程 vs 声明式编程
+
+**食谱**和**指令**的关键区别在于它们是两种不同的编程方式：
+
+- **命令式编程** - 我们发布一些指令，然后程序立即执行它。这种编程方式用于我们的分析脚本中：我们执行命令读入数据、进行转换、可视化并保存结果。
+- **声明式编程** - 我们表达高层次的目标或描述限制，然后依赖其他人决定如何以及何时将它们转换为行动。这是我们在 Shiny 中使用的编程方式。
+
+## 惰性
+
+Shiny 中声明式编程的一个优点是它允许应用非常的懒惰。Shiny 应用会尽量做最小的工作以完成对结果控件所需的更新。然而惰性也带来了重要的问题。读者能否发现下面 server 函数的问题呢？
+
+```r
+server <- function(input, output, session) {
+  output$greetnig <- renderText({
+    paste0("Hello ", input$name, "!")
+  })
+}
+```
+
+如果你仔细地观察并与上面正确的代码进行比较，你可能就会发现 `greeting` 写错成了 `greetnig`。这不会造成 Shiny 任何的错误，但它会产生我们不想要的结果。由于 `greetnig` 输出控件不存在，所以 `renderText()` 中的代码永远都不会运行！
+
+如果你发现你的 Shiny 应用不工作，且找不出任何问题，你就需要看看是否标识符是否一致了。
+
+## 响应图
+
+Shiny 惰性有另一个重要的属性。在大多数 R 代码中，你可以通过从头到尾阅读代码搞懂程序执行的顺序。然而**这在 Shiny 中是没有用的**，因为 Shiny **按需运行**。
+
+为了理解执行的顺序，你需要观察 **响应图**，它描述了输入和输出是如何连接到一起的。上面示例的响应图非常简单。
+
+![](https://d33wubrfki0l68.cloudfront.net/5c5072b4c68d256fd83ec93217282b8680bd5e2c/8861f/diagrams/basic-reactivity/graph-1b.png)
+
+对于每一个输入和输出控件，响应图都有对应的符号，当一个输出控件需要访问输入控件的数据时，我们就将它们连接起来。这个图告诉我们当 `name` 改变时，`greeting` 需要重新进行计算。也就是说，`greeting` （响应式）依赖于 `name`。
+
+为了简洁，下面的图表示相同的含义。
+
+![](https://d33wubrfki0l68.cloudfront.net/440750b044f8576efab767ca67f78000a5c54820/a6f63/diagrams/basic-reactivity/graph-1a.png)
+
+我们可以使用 **reactlog** 包绘制响应图。
+
+![](http://rstudio.github.io/reactlog/readme-images/pythagoras.gif)
+
+一个简单示例如下：
+
+```r
+library(shiny)
+library(reactlog)
+
+# 激活记录
+options(shiny.reactlog = TRUE)
+
+# 运行 Shiny 应用
+app <- system.file("examples/01_hello", package = "shiny")
+runApp(app)
+
+# 一旦 Shiny 应用关闭，展示响应图
+shiny::reactlogShow()
+```
+
+> 示例来于包文档，见 https://rstudio.github.io/reactlog/
+
+## 响应表达式
+
+响应图中一个重要组成是响应表达式，后续我们将稍微详细地介绍，现在我们将它看作一个减少代码重复地工具即可，它会在响应图中引入额外的节点。
+
+在简单的 Shiny 应用中我们很少会用到响应表达式，这里展示一个简单的示例以帮助读者理解它是如何影响响应图的。
+
+```r
+server <- function(input, output, session) {
+  text <- reactive(paste0("Hello ", input$name, "!"))
+  output$greeting <- renderText(text())
+}
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/3861827107854f459c0b3c980ce52e9bd7e42ec6/97f98/diagrams/basic-reactivity/graph-2b.png)
+
+## 执行顺序
+
+前面我们已经提到 Shiny 服务代码是按需运行的，也就是说 server 函数中的代码顺序不会影响结果。
+
+```r
+server <- function(input, output, session) {
+  output$greeting <- renderText(text())
+  text <- reactive(paste0("Hello ", input$name, "!"))
+}
+```
+
+这样的写法也是对的，不会产生任何问题。但我们也要知道，按顺序编写让我们更容易理解。但需要注意**响应式代码的执行顺序是由响应图决定的，而不是它放置的顺序**。
+
+## 练习
+
+为下面的 server 函数绘制响应图：
+
+```r
+server1 <- function(input, output, session) {
+  c <- reactive(input$a + input$b)
+  e <- reactive(c() + input$d)
+  output$f <- renderText(e())
+}
+server2 <- function(input, output, session) {
+  x <- reactive(input$x1 + input$x2 + input$x3)
+  y <- reactive(input$y1 + input$y2)
+  output$z <- renderText(x() / y())
+}
+server3 <- function(input, output, session) {
+  d <- reactive(c() ^ input$d)
+  a <- reactive(input$a * 10)
+  c <- reactive(b() / input$c) 
+  b <- reactive(a() + input$b)
+}
+```
+
+> 有兴趣的读者可以试试，后面我们一起探讨结果。

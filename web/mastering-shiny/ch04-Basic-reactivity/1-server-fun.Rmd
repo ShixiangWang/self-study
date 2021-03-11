@@ -1,0 +1,125 @@
+# 响应式编程基础（一） - server 函数
+
+在前面的文章中，我们介绍了如何创建用户界面。现在我们将内容转向对于 Shiny 服务端的讨论，它会让我们在运行时中使用R代码让用户界面栩栩如生。
+
+在 Shiny 中，我们使用**响应式编程**表达服务逻辑。响应式编程是一种优雅且强大的编程范式，但由于它与我们编写脚本的范式不同，因此一开始读者可能会感到困惑。响应式编程的核心思想是**指定依赖关系图，以便当输入发生更改时，所有相关的输出都会自动更新**。这使得编写 Shiny 应用的流程变得相当简单，但是要花一些时间才能了解它们如何组合在一起。
+
+这部分内容将对响应式编程进行简要介绍，指导读者在 Shiny 应用中使用最基本的响应式编程。我们将从 server 函数开始，讨论更多让 `input` 和 `output` 参数工作的细节。接着我们将回顾最简单的响应式（将输入直接连接到输出），然后讨论响应式表达式如何让我们减少重复的工作。最后，我们将回顾 Shiny 初级使用者遇到的一些常见问题。
+
+```r
+library(shiny)
+```
+
+## server 函数
+
+学习过之前文章的读者应该已经知道，Shiny 的核心结构如下：
+
+```r
+library(shiny)
+
+ui <- fluidPage(
+  # 前端界面
+)
+
+server <- function(input, output, session) {
+  # 后端逻辑
+}
+
+shinyApp(ui, server)
+```
+
+
+之前的很多文章已经介绍过前端的一些基础，`ui` 对象包含呈现给 Shiny 每个用户的 HTML 内容。因为前端呈现给每个用户的页面是一样的，所以 `ui` 很简单；而 `server` 就会很复杂，这是因为每个用户都需要一个独立版本的应用：例如，当用户 A 移动滑块时，用户 B 不应该受到影响。
+
+为了达到这样的目的，Shiny 每次启动一个新的会话，都会调用一次 `server()` 函数。就像其他任何 R 函数一样，每当 server 函数被调用时，它都会创建一个新的独立局部环境。这保证了每个线程都有一个唯一的状态，同时隔离了在函数内部创建的变量。这也正是我们为什么基本上只在 Shiny 的 server 函数内使用响应式编程的原因。
+
+server 函数有 3 个参数：`input`、`output` 和 `session`。因为我们基本上不会自己调用这个函数，所有我们也不会要自己创建这些对象。相反，它们是 Shiny 启动时自动创建的，绑定一个特定的会话。从现在起，我们将关注前两个参数，最好一个参数留到以后介绍（通常情况下我们不会用到它）。
+
+### input 参数
+
+`input` 参数它是一个列表结构的对象，它包含了从浏览器发来的所有输入数据，根据数据的 input ID 进行命名。例如，如果我们的 UI 包含一个数值型输入控件，它的 ID 是 `count`，如下：
+
+```r
+ui <- fluidPage(
+  numericInput("count", label = "Number of values", value = 100)
+)
+```
+
+那么你就可以使用 `input$count` 访问它。一开始它的初始值是 `100`，如果用户在浏览器端更改了它将会自动更新。
+
+与常规列表不同的是，`input` 对象仅可读。如果你尝试在 `server()` 函数中更改它，你将会收到报错信息。
+
+```r
+server <- function(input, output, session) {
+  input$count <- 10  
+}
+
+shinyApp(ui, server)
+#> Error: Attempted to assign value to a read-only reactivevalues object
+```
+
+发生此错误的原因是 `input` 如果在内部被修改就不能反应用户在浏览器中的输入，从而造成了不一致性，这是 Shiny 所不允许的。不过，有时候动态地修改界面显示是有必要地，之后我们会介绍通过像 `updateNumericInput()` 这样的函数来进行更新。
+
+关于 `input` 有另外一个重要的事情：允许读取它是有选择性的。我们必须通过像 `renderText()` 或 `reactive()` 这样的函数创建的**响应式语境**中才能从一个输入控件中读入数据。
+
+如果你没有搞懂这一点，就有可能产生类似下面的错误：
+
+```r
+server <- function(input, output, session) {
+  message("The value of input$count is ", input$count)
+  ## 正确做法是
+    #   renderText({
+    #       message("The value of input$count is ", input$count)
+    #   })
+}
+
+shinyApp(ui, server)
+#> Error: Operation not allowed without an active reactive context. 
+#> (You tried to do something that can only be done from inside 
+#> a reactive expression or observer.)
+```
+
+
+### output 参数
+
+`output` 参数与 `input` 类似，它们主要的区别在于 `output` 是向浏览器发送数据而不是接收数据。我们总是将 `output` 对象与一个 `render` 函数绑定使用，下面是一个简单实例：
+
+```r
+ui <- fluidPage(
+  textOutput("greeting")
+)
+
+server <- function(input, output, session) {
+  output$greeting <- renderText("Hello human!")
+}
+```
+
+> 在 UI 中，ID 是有双引号的，而后端中没有。
+
+`render` 函数做了两项工作：
+
+- 它建立了一个特殊的响应式语境用于自动捕获（追踪）输出使用的输入
+- 它将 R 代码的输出转换为了 HTML 内容用于网页展示
+
+像 `input` 一样，`output` 对使用方式也很挑剔。如果出现以下情况，则会报错：
+
+- 你忘记使用 `render` 函数。
+
+  ```r
+  server <- function(input, output, session) {
+  output$greeting <- "Hello human"
+  }
+  shinyApp(ui, server)
+  #> Error: Unexpected character output for greeting
+  ```
+
+- 你尝试从输出控件中读取数据。
+
+  ```r
+  server <- function(input, output, session) {
+    message("The greeting is ", output$greeting)
+  }
+  shinyApp(ui, server)
+  #> Error: Reading objects from shinyoutput object not allowed.
+  ```
+

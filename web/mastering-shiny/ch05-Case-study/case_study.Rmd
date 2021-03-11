@@ -1,0 +1,510 @@
+
+# 案例研究：急诊室受伤情况分析
+
+```r
+setwd("shiny/ch05-Case-study/")
+```
+
+在之前的推文中我们学习了一堆的知识与概念，为了帮助大家吸收，接下来我们将一起通过创建一个探究有趣数据集的 Shiny 应用来整合当前所学的所有思想。
+
+我们将首先在 Shiny 之外做一点数据分析工作，然后将它变成应用。一开始会简单点，然后逐步增加更多的细节。
+
+首先我们导入所需的工具包，除了 Shiny，我们还需要 vroom 包提供快速的文件数据读入、tidyverse 提供通用数据分析功能。
+
+```r
+library(shiny)
+library(vroom)
+library(tidyverse)
+```
+
+## 数据
+
+我们将探索美国国家电子伤害监视系统（NEISS）的数据，它由 由消费品安全委员会收集。这是一项长期研究，记录了在美国代表性医院中发现的所有事故。这是一个有趣的数据集，因为每个人都已经熟悉该领域，并且每个观察结果都附有简短的叙述，以解释事故的发生方式。你可以在 <https://github.com/hadley/neiss> 上找到有关此数据集的更多信息。
+
+本文将聚焦于 2017 年的数据，该数据不是很大，因此可以存储在 Git，并方便后续的使用。
+
+我们使用下面的代码提取需要的数据并将其存储。
+
+```r
+library(tidyverse)
+# install_github("hadley/neiss")
+library(neiss)
+
+top_prod <- injuries %>%
+  filter(trmt_date >= as.Date("2017-01-01"), trmt_date < as.Date("2018-01-01")) %>%
+  count(prod1, sort = TRUE) %>%
+  filter(n > 5 * 365)
+
+injuries %>%
+  filter(trmt_date >= as.Date("2017-01-01"), trmt_date < as.Date("2018-01-01")) %>%
+  semi_join(top_prod, by = "prod1") %>%
+  mutate(age = floor(age), sex = tolower(sex), race = tolower(race)) %>%
+  filter(sex != "unknown") %>%
+  select(trmt_date, age, sex, race, body_part, diag, location, prod_code = prod1, weight, narrative) %>%
+  vroom::vroom_write("neiss/injuries.tsv.gz")
+
+products %>%
+  semi_join(top_prod, by = c("code" = "prod1")) %>%
+  rename(prod_code = code) %>%
+  vroom::vroom_write("neiss/products.tsv")
+
+population %>%
+  filter(year == 2017) %>%
+  select(-year) %>%
+  rename(population = n) %>%
+  vroom::vroom_write("neiss/population.tsv")
+```
+
+> 上述数据集可以通过 <https://www.jianguoyun.com/p/DUKjjHkQ6uuVCBiU_fYC> 进行下载。
+
+```r
+injuries = vroom::vroom("neiss/injuries.tsv.gz")
+injuries
+```
+
+```
+# A tibble: 255,064 x 10
+   trmt_date    age sex    race   body_part diag   location  prod_code weight narrative        
+   <date>     <dbl> <chr>  <chr>  <chr>     <chr>  <chr>         <dbl>  <dbl> <chr>
+ 1 2017-01-01    71 male   white  Upper Tr~ Contu~ Other Pu~      1807   77.7 71YOM FELL ON FL~ 
+ 2 2017-01-01    16 male   white  Lower Arm Burns~ Home            676   77.7 16YOM TRIPPED OV~ 
+ 3 2017-01-01    58 male   white  Upper Tr~ Contu~ Home            649   77.7 58 YOM WENT TO B~ 
+ 4 2017-01-01    21 male   white  Lower Tr~ Strai~ Home           4076   77.7 21 YOM TURNED WR~ 
+ 5 2017-01-01    54 male   white  Head      Inter~ Other Pu~      1807   77.7 54 YOM WAS FOUND~ 
+ 6 2017-01-01    21 male   white  Hand      Fract~ Home           1884   77.7 21 YOM HIT WALL ~ 
+ 7 2017-01-01    35 female not s~ Lower Tr~ Strai~ Home           1807   87.1 35YOF STR LWR BA~ 
+ 8 2017-01-01    62 female not s~ Lower Arm Lacer~ Home           4074   87.1 62YOF LAC LWR AR~ 
+ 9 2017-01-01    22 male   not s~ Knee      Dislo~ Home           4076   87.1 22YOM D'LOC KNEE~ 
+10 2017-01-01    58 female not s~ Lower Leg Fract~ Home           1842   87.1 58YOF FX LWR LEG~ 
+# ... with 255,054 more rows
+```
+
+每行代表一次具有10个变量的事故：
+
+- `trmt_date` 是受伤人住院日期（不是事件发生时间）。
+- `age`、`sex` 和 `race` 给出了受伤人人口统计信息。
+- `body_part` 是受伤部位；`location` 是受伤地点（家、学校等）。
+- `diag` 记录了受伤的基本诊断信息（像骨折或撕裂）。
+- `prod_code` 记录了与受伤相关的主要产品。
+- `weight` 是统计权重，给出了如果将此数据集缩放到美国全部人口后将遭受此伤害的估计人数。
+- `narrative` 是关于事故如何发生的简短故事。
+
+我们将其与其他两个数据框配对使用，以提供更多背景信息：`products` 可让我们从产品代码中查找产品名称；`population` 可告诉我们 2017 年美国各个年龄段和性别的总人口。
+
+```r
+products = vroom::vroom("neiss/products.tsv")
+products
+```
+
+```
+# A tibble: 38 x 2
+   prod_code title
+       <dbl> <chr>
+ 1       464 knives, not elsewhere classified
+ 2       474 tableware and accessories
+ 3       604 desks, chests, bureaus or buffets
+ 4       611 bathtubs or showers
+ 5       649 toilets
+ 6       676 rugs or carpets, not specified
+ 7       679 sofas, couches, davenports, divans or st
+ 8      1141 containers, not specified
+ 9      1200 sports or recreational activity, n.e.c.
+10      1205 basketball (activity, apparel or equip.)
+# ... with 28 more rows
+```
+
+```r
+population = vroom::vroom("neiss/population.tsv")
+population
+```
+
+```
+# A tibble: 170 x 3
+     age sex    population
+   <dbl> <chr>       <dbl>
+ 1     0 female    1924145
+ 2     0 male      2015150
+ 3     1 female    1943534
+ 4     1 male      2031718
+ 5     2 female    1965150
+ 6     2 male      2056625
+ 7     3 female    1956281
+ 8     3 male      2050474
+ 9     4 female    1953782
+10     4 male      2042001
+# ... with 160 more rows
+```
+
+## 数据探索
+
+在创建 Shiny 应用之前，让我们先探讨一下数据。我们将首先查看与最严重伤害相关联的产品：1842，“楼梯或台阶”。首先，我们将提取相关数据。
+
+```r
+selected = injuries %>% filter(prod_code == 1842)
+nrow(selected)
+```
+
+接下来，我们将对诊断、身体部位以及受伤发生的位置进行一些基本的汇总。请注意，我用`weight` 变量加权，这样计数就可以解释为整个美国的估计总伤害。
+
+```r
+selected %>% count(diag, wt = weight, sort = TRUE)
+```
+
+```
+# A tibble: 23 x 2
+   diag                        n
+   <chr>                   <dbl>
+ 1 Strain, Sprain        267892.
+ 2 Fracture              243082.
+ 3 Other Or Not Stated   227515.
+ 4 Contusion Or Abrasion 195172.
+ 5 Inter Organ Injury    111340.
+ 6 Laceration             89190.
+ 7 Concussion             18983.
+ 8 Dislocation            16556.
+ 9 Hematoma               13080.
+10 Nerve Damage            7705.
+# ... with 13 more rows
+```
+
+```r
+selected %>% count(body_part, wt = weight, sort = TRUE)
+```
+
+```
+# A tibble: 25 x 2
+   body_part         n
+   <chr>         <dbl>
+ 1 Ankle       183470.
+ 2 Head        174725.
+ 3 Lower Trunk 150459.
+ 4 Knee        112162.
+ 5 Upper Trunk  98197.
+ 6 Face         73815.
+ 7 Foot         73388.
+ 8 Shoulder     52637.
+ 9 Lower Leg    52254.
+10 Wrist        39202.
+# ... with 15 more rows
+```
+
+```r
+selected %>% count(location, wt = weight, sort = TRUE)
+```
+
+```
+# A tibble: 8 x 2
+  location                         n
+  <chr>                        <dbl>
+1 Home                       647127.
+2 Unknown                    458802.
+3 Other Public Property       57625.
+4 School                      25146.
+5 Sports Or Recreation Place  11833.
+6 Street Or Highway            2148.
+7 Mobile Home                   783.
+8 Farm                          150.
+```
+
+如你所料，脚步经常与在家中发生的脚踝扭伤，拉伤和骨折有关。
+
+我们还可以探索年龄和性别的模式。这里我们有很多的数据，所以表格不是那么有用，因此我们可以绘图，使模式更加明显。
+
+```r
+summary = selected %>% 
+  count(age, sex, wt = weight)
+summary
+```
+
+```
+# A tibble: 204 x 3
+     age sex         n
+   <dbl> <chr>   <dbl>
+ 1     0 female  3714.
+ 2     0 male    3981.
+ 3     1 female 12155.
+ 4     1 male   12898.
+ 5     2 female  6949.
+ 6     2 male    9730.
+ 7     3 female  4542.
+ 8     3 male    8404.
+ 9     4 female  3618.
+10     4 male    4845.
+# ... with 194 more rows
+```
+
+```r
+summary %>% 
+  ggplot(aes(age, n, colour = sex)) + 
+  geom_line() + 
+  labs(y = "Estimated number of injuries")
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/fa8032821ce1c7b62f3fc58522c162d1617ff720/45bdc/basic-case-study_files/figure-html/stairs-raw-1.png)
+
+当孩子们学习走路时，我们看到一个大的高峰，到中年以后逐渐变平，然后在 50 岁以后逐渐下降。有趣的是，女性受伤的次数要多得多（也许这是由于高跟鞋吗？）。
+
+解释这种模式的一个问题是，我们知道老年人比年轻人少，因此可受伤的人口也较小。我们可以通过比较受伤人数与总人数并计算受伤率来控制这一情况。在这里，我使用每 10,000的比率。
+
+```r
+summary = selected %>% 
+  count(age, sex, wt = weight) %>% 
+  left_join(population, by = c("age", "sex")) %>% 
+  mutate(rate = n / population * 1e4)
+
+summary
+```
+
+```
+# A tibble: 204 x 5
+     age sex         n population  rate
+   <dbl> <chr>   <dbl>      <dbl> <dbl>
+ 1     0 female  3714.    1924145  19.3
+ 2     0 male    3981.    2015150  19.8
+ 3     1 female 12155.    1943534  62.5
+ 4     1 male   12898.    2031718  63.5
+ 5     2 female  6949.    1965150  35.4
+ 6     2 male    9730.    2056625  47.3
+ 7     3 female  4542.    1956281  23.2
+ 8     3 male    8404.    2050474  41.0
+ 9     4 female  3618.    1953782  18.5
+10     4 male    4845.    2042001  23.7
+# ... with 194 more rows
+```
+
+新绘制的图所示的比率在 50 岁以后产生了截然不同的趋势：虽然受伤的人数减少了，但是受伤的比率却继续增加。
+
+```r
+summary %>% 
+  ggplot(aes(age, rate, colour = sex)) + 
+  geom_line(na.rm = TRUE) + 
+  labs(y = "Injuries per 10,000 people")
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/69c7872bd13c5a85e32bb47d17c2b26444485e5e/01529/basic-case-study_files/figure-html/stairs-rate-1.png)
+
+最后，我们可以看一些 narratives。浏览这些内容是一种非正式的方法，可以用来检查我们的假设并产生新的想法以供进一步探索。在这里，我随机抽取 10 个样本：
+
+```r
+selected %>% 
+  sample_n(10) %>% 
+  pull(narrative)
+
+```
+
+```
+[1] "56YM RECENTLY BEEN WORKING OUT REG.&DEV'D HIP PAIN WHICH GOT WORSE C WALKING UPSTAIRS>>MS"
+ [2] "85YOM ON *** AND FELL DOWN A FLIGHT OF STAIRS ONTO BUTTOCKS- DEVELOPEDA VERY LARGE HEMATOMA TO BUTTOCKS- DX HEMATOMA BUTTOCKS"
+ [3] "13 MONTH OLD MALE HIT MOUTH ON STEPS AND LAC LIP AND MOUTH"
+
+ [4] "54 YF FELL DOWN A FLIGHT OF STAIRS AND LANDED IN THE FOYER. DX HIP FX"
+
+ [5] "R ANKLE SPR/48YOBF SLIPPED AT HM 2 DAYS AGO ON A STEP OUTSIDE CAUSINGHER TO FALL & FOOT WENT INTO A SINK HOLE."
+ [6] "4YOM FELL OFF LAST FEW STEPS WHEN JUMPING , FELL ON ARM; FOREARM FX."
+
+ [7] "71YOM C/O LT THIGH PAIN & SWELLING X 2 WKS AFTER MISSING A STEP & FALLING AT SON'S HOME, IS ON ***. DX - LT THIGH HEMATOMA"
+ [8] "89YOF COMP FX LWR BACK- FELL STEPS"
+
+ [9] "RT WRIST FX.  77YOF FELL AGAINST DOOR AND BROKE WRIST GOING DOWN STEPSAT HOME."
+
+[10] "12 YO F CONCUSSION HEAD-SLIPPED ON STAIRS"
+```
+
+对一种产品进行了这种探索之后，如果我们可以轻松地对其他产品进行处理而不必重新输入代码，那将是非常好的。因此，让我们制作一个 Shiny 应用！
+
+## 原型
+
+在构建复杂的应用程序时，我强烈建议读者尽可能简单地开始，这样你就可以在开始做更复杂的事情之前确认基本的机制是正常工作的。在这里，我们将从一个输入（产品代码），三个表格和一个绘图开始。
+
+制作第一个原型时，面临的挑战是“尽可能简单”。快速让基础功能工作和规划 Shiny 应用的未来之间存在着复杂关系。两种极端情况都可能是不好的：如果我们的设计过于狭窄，那么以后将花费大量时间来重新设计应用程序；如果我们设计得过于严格，则会花费大量时间来编写代码，这些代码后来最终会出现断层。为了帮助达到正确的平衡，在提交代码之前，我们可以经常做一些铅笔素描来快速浏览 UI 和反应图。
+
+在这里，我决定为输入控件设置一行（这是因为我可能要在此应用程序完成之前添加更多的输入），为所有三个表分配一行（给每个表 4 列，是 12 列宽度的 1/3）），然后为图行绘制分配一行：
+
+```r
+ui <- fluidPage(
+  fluidRow(
+    column(6,
+      selectInput("code", "Product", setNames(products$prod_code, products$title))
+    )
+  ),
+  fluidRow(
+    column(4, tableOutput("diag")),
+    column(4, tableOutput("body_part")),
+    column(4, tableOutput("location"))
+  ),
+  fluidRow(
+    column(12, plotOutput("age_sex"))
+  )
+)
+```
+
+注意 `setNames(products$prod_code, products$title)` 的目的是用户选择产品名而内部返回产品代码。
+
+服务器函数相对直观。我们首先将上面定义的 `selected` 和 `summary` 变量转换为响应表达式。这是一种合理的通用模式：**我们可以在数据分析中创建变量，以将分析分解为多个步骤，并避免多次重新计算，而响应式表达式在 Shiny 应用程序中扮演相同的角色**。
+
+通常，在启动 Shiny 应用程序之前花一点时间清理分析代码是个好主意，因此，在增加反应性的复杂性之前，我们可以在常规 R 代码中考虑这些问题。
+
+```r
+server <- function(input, output, session) {
+  selected <- reactive(injuries %>% filter(prod_code == input$code))
+
+  output$diag <- renderTable(
+    selected() %>% count(diag, wt = weight, sort = TRUE)
+  )
+  output$body_part <- renderTable(
+    selected() %>% count(body_part, wt = weight, sort = TRUE)
+  )
+  output$location <- renderTable(
+    selected() %>% count(location, wt = weight, sort = TRUE)
+  )
+
+  summary <- reactive({
+    selected() %>%
+      count(age, sex, wt = weight) %>%
+      left_join(population, by = c("age", "sex")) %>%
+      mutate(rate = n / population * 1e4)
+  })
+
+  output$age_sex <- renderPlot({
+    summary() %>%
+      ggplot(aes(age, n, colour = sex)) +
+      geom_line() +
+      labs(y = "Estimated number of injuries") +
+      theme_grey(15)
+  })
+}
+```
+
+注意这里将 `summary` 设定为响应表达式是非必需的，因为此处它只使用了一次。但这种写法是一个良好的习惯，它更好理解和拓展。
+
+接下来运行 Shiny 看看原型结果。
+
+```r
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/af299ae0e6295ff2aa83b9ee3eb7c555fd1902a1/4bb21/screenshots/basic-case-study/prototype.png)
+
+
+## 表格加工
+
+现在我们已经具备了基本的组件并且可以正常工作，我们可以逐步改进我们的应用程序。该应用程序的第一个问题是它在表格中显示了很多信息，我们可能只需要突出显示。要解决此问题，我们首先需要弄清楚如何截断表。我选择结合使用 forcats 函数来执行此操作：我将变量转换为因子，按级别的频率排序，然后将前 5 个级别之后的所有级别汇总在一起。
+
+```r
+injuries %>%
+  mutate(diag = fct_lump(fct_infreq(diag), n = 5)) %>%
+  group_by(diag) %>%
+  summarise(n = as.integer(sum(weight)))
+```
+
+```
+# A tibble: 6 x 2
+  diag                        n
+  <fct>                   <int>
+1 Other Or Not Stated   1806436
+2 Fracture              1558961
+3 Laceration            1432407
+4 Strain, Sprain        1432556
+5 Contusion Or Abrasion 1451987
+6 Other                 1929147
+```
+
+因为我知道该怎么做，所以我写了一个小函数来自动化任何变量。这里的细节不是很重要；也不必担心这看起来是否完全陌生：我们也可以通过复制和粘贴来解决问题。
+
+```r
+count_top <- function(df, var, n = 5) {
+  df %>%
+    mutate({{ var }} := fct_lump(fct_infreq({{ var }}), n = n)) %>%
+    group_by({{ var }}) %>%
+    summarise(n = as.integer(sum(weight)))
+}
+```
+
+然后将它用于 Server 函数中：
+
+```r
+  output$diag <- renderTable(count_top(selected(), diag), width = "100%")
+  output$body_part <- renderTable(count_top(selected(), body_part), width = "100%")
+  output$location <- renderTable(count_top(selected(), location), width = "100%")
+```
+
+这里进行了另一项更改以提高应用程序的美观度：强制所有表格占用最大宽度（即填充它们出现在其中的列）。这使输出在美学上更令人愉悦，因为它减少了偶然的变化量。
+
+更改后的 App 如下：
+
+![](https://d33wubrfki0l68.cloudfront.net/6715440fc49e331fc1f0a28ef1506d435472a291/aebaf/screenshots/basic-case-study/polish-tables.png)
+
+## 比率 vs 计数
+
+到目前为止，我们仅显示一个图，但我们希望为用户提供可视化的受伤人数或人口标准化率之间的选择。首先，我们向 UI 添加控件。在这里，我选择使用 `selectInput()`，因为它可以使两个状态都明确显示，并且将来可以轻松添加新状态：
+
+```r
+  fluidRow(
+    column(8,
+      selectInput("code", "Product",
+        choices = setNames(products$prod_code, products$title),
+        width = "100%"
+      )
+    ),
+    column(2, selectInput("y", "Y axis", c("rate", "count")))
+  ),
+```
+
+
+我们默认比率是因为我认为这样做更安全：人们无需了解人口分布即可正确解释该图。
+
+然后在生成绘图时设定条件控制：
+
+```r
+  output$age_sex <- renderPlot({
+    if (input$y == "count") {
+      summary() %>%
+        ggplot(aes(age, n, colour = sex)) +
+        geom_line() +
+        labs(y = "Estimated number of injuries") +
+        theme_grey(15)
+    } else {
+      summary() %>%
+        ggplot(aes(age, rate, colour = sex)) +
+        geom_line(na.rm = TRUE) +
+        labs(y = "Injuries per 10,000 people") +
+        theme_grey(15)
+    }
+  })
+```
+
+修改后的应用如下：
+
+![](https://d33wubrfki0l68.cloudfront.net/5c10b7f7652e5df9931e7ec1ae251c40a4564711/a5376/screenshots/basic-case-study/rate-vs-count.png)
+
+## 叙述
+
+最后，我们想提供一种访问叙述 Narrative 的方法，因为它们是如此有趣，并且它们提供了一种非正式的方法来交叉检查在查看图形时提出的假设。在之前 R 代码中，我们一次采样了多个叙述，但没有理由在可以进行交互式浏览的应用中进行该操作。
+
+解决方案分为两部分。首先，我们在 UI 底部添加一个新行。我们使用一个动作按钮来触发一个新叙述故事，然后将叙述内容放入 `textOutput()` 中：
+
+```r
+  fluidRow(
+    column(2, actionButton("story", "Tell me a story")),
+    column(10, textOutput("narrative"))
+  )
+```
+
+动作按钮的结果是一个整数，每次单击都会增加。在这里，我们只是用它来触发随机选择的重新执行：
+
+```r
+  output$narrative <- renderText({
+    input$story
+    selected() %>% pull(narrative) %>% sample(1)
+  })
+```
+
+最后的显示效果如下：
+
+![](https://d33wubrfki0l68.cloudfront.net/3148b2daf8c2c7ab066081a01733b182cb163878/a0a03/screenshots/basic-case-study/narrative.png)
+
+
+这样，一个不错的分析展示应用就完成了！
+
+
+

@@ -1,0 +1,169 @@
+# 工作流（二）调试
+
+当你开始编写应用程序时，几乎可以确定会出错。导致大多数错误的原因是我们心里的 Shiny 设计模型与 Shiny 实际的运行情况的不匹配。当你阅读本文时，你的思维模式将得到改善，从而减少犯错，而一旦犯错，就更容易发现问题。但是，要想首次使用代码就可以可靠地解决复杂的问题，就需要使用多种语言的多年经验。这意味着你需要构建一个强大的工作流来识别和修复错误。
+
+我们将在下面讨论三种主要问题：
+
+- 你收到意外错误。这是最简单的情况，因为你将获得一个错误追踪，使你可以准确确定错误的出处。一旦发现问题，就需要系统地测试假设，直到发现期望值与实际情况之间存在差异。交互式调试器是解决该问题的强大工具。
+- 你没有收到任何错误，但是值不正确。在这里，通常最好将其转换为第一个问题，方法是在出现错误值时使用 `stop()` 引发错误。
+- 所有值都是正确的，但是在你期望的时候它们不会更新。这是最具挑战性的问题，因为它是 Shiny 所特有的，因此你无法利用现有的 R 调试技能。
+
+当出现这些情况时，这很令人沮丧，但是你可以将它们变成练习调试技能的机会。
+
+在下一部分中，我们将介绍另一种重要的技术，以最小的可重现性为例。如果你陷入困境并需要别人的帮助，创建一个最小的示例至关重要。但是，在调试自己的代码时，创建最少的示例也是一项极为重要的技能。通常，我们有很多可以正常运行的代码，还有很少量的会引起问题的代码。如果我们可以通过删除有效的代码来缩小问题代码的范围，则可以更快地迭代解决方案。这是我一直使用的技术。
+
+## 阅读错误追踪
+
+每个错误都伴有一个追溯或调用堆栈，它实际上是追溯导致该错误的调用堆栈。例如，采取以下简单的调用顺序：`f()` 调用 `g()` 调用 `h()`，而 `h()` 使用了乘法操作。
+
+```r
+f <- function(x) g(x)
+g <- function(x) h(x)
+h <- function(x) x * 2
+```
+
+如果代码报错了，如下：
+
+```r
+f("a")
+#> Error in x * 2: non-numeric argument to binary operator
+```
+
+调用堆栈是导致问题的调用顺序：
+
+```r
+1: f("a")
+2: g(x)
+3: h(x)
+```
+
+您可能已经熟悉 R 中的 `traceback()`。此功能可以在发生错误之后以交互方式运行以查看导致错误的调用顺序。我们无法在 Shiny 中使用此功能，因为我们无法在应用运行时以交互方式运行代码，而是 Shiny 会自动为我们打印调用堆栈。例如，以使用我上面定义的 `f()` 函数的简单应用程序为例：
+
+```r
+library(shiny)
+
+ui <- fluidPage(
+  selectInput("n", "N", 1:10),
+  plotOutput("plot")
+)
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    n <- f(input$n)
+    plot(head(cars, n))
+  })
+}
+shinyApp(ui, server)
+```
+
+
+如果运行此代码，我们会在应用程序中看到错误消息，并在控制台中看到调用堆栈：
+
+```
+Warning: Error in *: non-numeric argument to binary operator
+  173: g [~/.active-rstudio-document#4]
+  172: f [~/.active-rstudio-document#3]
+  171: renderPlot [~/.active-rstudio-document#13]
+  169: func
+  129: drawPlot
+  115: <reactive:plotObj>
+   99: drawReactive
+   86: origRenderFunc
+   85: output$plot
+    5: runApp
+    3: print.shiny.appobj
+    1: source
+```
+
+
+Shiny 将一些其他调用添加到调用堆栈中。要了解发生了什么，请先将其上下颠倒，这样我们就可以按显示顺序查看调用顺序：
+
+```
+Warning: Error in *: non-numeric argument to binary operator
+    1: source
+    3: print.shiny.appobj
+    5: runApp
+   85: output$plot
+   86: origRenderFunc
+   99: drawReactive
+  115: <reactive:plotObj>
+  129: drawPlot
+  169: func
+  171: renderPlot [~/.active-rstudio-document#13]
+  172: f [~/.active-rstudio-document#3]
+  173: g [~/.active-rstudio-document#4]
+```
+
+调用栈包含三个基本部分：
+
+- 前几个调用会启动应用程序。
+
+  ```
+  1: source
+  3: print.shiny.appobj
+  5: runApp
+  ```
+
+- 接下来，我们看到一些内部 Shiny 的代码负责调用反应式表达式。
+
+  ```
+   85: output$plot
+   86: origRenderFunc
+   99: drawReactive
+  115: <reactive:plotObj>
+  129: drawPlot
+  169: func
+  ```
+
+在这里，发现 `output$plot` 非常重要-它告诉我们哪个反应堆导致了错误。接下来的几个功能是内部的，我们可以忽略它们。
+
+- 最后，在最底部，我们将看到编写的代码函数。
+
+  ```
+  171: renderPlot [~/.active-rstudio-document#13]
+  172: f [~/.active-rstudio-document#3]
+  173: g [~/.active-rstudio-document#4]
+  ```
+
+如果你在应用程序中遇到错误但没有看到回溯，请确保你正在使用 Cmd/Ctrl + Shift + Enter（或者如果不在 RStudio 中，请调用 `runApp()`）运行该应用程序，并且已保存你正在运行的文件。其他运行应用程序的方式并不总是捕获进行调用堆栈所需的信息。
+
+## 交互式调试器
+
+
+找到错误的根源并弄清楚是什么原因后，你可以使用的最强大的工具是**交互式调试器**。调试器会暂停执行，并为你提供一个交互式 R 控制台，你可以在其中运行任何代码以找出问题所在。有两种启动调试器的方法：
+
+- 在你的源代码中添加对 `browser()`的调用。这是启动交互式调试器的标准 R 方法，并且可以在你运行状况良好的情况下使用。`browser()` 的另一个优点是，由于它是 R 代码，因此可以通过将其与 if 语句结合使用来使其成为有条件的：
+
+  ```r
+  if (input$debug) {
+    browser()
+  }
+  ```
+
+- 通过单击行号左侧来添加 RStudio 断点。你可以通过单击红色圆圈删除断点。断点的优点在于它们不是代码，因此你不必担心将它们意外地插入到版本控制系统中。
+
+![](https://d33wubrfki0l68.cloudfront.net/372abe862b7a1faa69fdb7455792776be66c4d6b/d325a/images/action-workflow/breakpoint.png)
+
+
+如果你使用的是 RStudio，则在调试器中将显示下图中的工具栏。工具栏是记住现在可用的调试命令的简便方法。它们也可以在 RStudio 之外使用；你只需要记住一个字母命令即可激活它们。三个最有用的命令是：
+
+- 下一步 `n`：执行函数的下一步。请注意，如果你有一个名为 `n` 的变量，则需要使用 `print(n)` 来显示其值。
+- 继续 `c`：离开交互式调试并继续正常执行该函数。如果你已修正错误状态并希望检查函数是否正常运行，这将非常有用。
+- 停止 `Q`：停止调试，终止功能，然后返回全局工作区。确定问题出在哪里后，就可以使用它，并准备好进行修复并重新加载代码。
+
+
+![RStudio 调试工具栏](https://d33wubrfki0l68.cloudfront.net/08e163d4340339f15a7f124f52269a5797180adc/11f05/images/action-workflow/debug-toolbar.png)
+
+## 将不对的值转换为错误
+
+如果你遇到的问题不是错误，建议将其转换为错误，以便更轻松地查找问题。读者可以通过编写自己的调用 `stop()` 的代码来实现。
+
+## 调试响应式编程
+
+使用 `message()` 向控制台发出消息，这样我们可以准确查看代码何时运行。你可以将消息放入任何反应式表达式或输出中，只需确保它们不是最后一行（否则它们将成为反应表达式或输出使用的值）。
+
+如果要输出多个值，则 **glue** 包可能会有用；它使创建内容丰富的文本字符串变得非常容易。
+
+如果问题是反应式事件未按预期触发，你可能需要查找反应式日志，[**reactlog**](https://github.com/rstudio/reactlog) 包可能会很有用。
+
+
+

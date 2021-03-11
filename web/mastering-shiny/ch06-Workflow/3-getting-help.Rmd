@@ -1,0 +1,66 @@
+# 工作流（三）获取帮助
+
+如果尝试了前文的技巧之后，读者仍然陷于困境，那么也许该该问别人了。获得帮助的好地方是 Shiny 社区网站  <https://community.rstudio.com/c/shiny>。许多 Shiny 用户以及 Shiny 包本身的开发人员都常阅读这个站点。如果你想通过帮助他人来提高自己的 Shiny 技能，这也是一个好地方。
+
+为了尽快获得最有用的帮助，你需要创建一个 reprex ，即可复制的示例。reprex 的目标是提供最小的 R 代码段，以说明问题并可以在另一台计算机上轻松运行（就是别人能够重复出你的问题并能快速修改，对于普通的 R 代码也是一个常用工具）。创建 reprex 不仅是出于个人需求，同时也是一种礼貌，如果你希望有人帮助你，则应该尽可能简化它！
+
+创建 reprex 是有礼貌的在于它将问题的基本要素捕获为其他任何人都可以运行的形式，以便任何试图帮助你的人都可以快速准确地了解问题所在，并可以轻松地尝试可能的解决方案。
+
+
+## Reprex 基础
+
+一个 reprex 就是当你复制粘贴到另外一台电脑依旧能够重新运行的 R 代码。下面是一个简单的 Shiny 应用 reprex：
+
+```r
+library(shiny)
+ui <- fluidPage(
+  selectInput("n", "N", 1:10),
+  plotOutput("plot")
+)
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    n <- input$n * 2
+    plot(head(cars, n))
+  })
+}
+shinyApp(ui, server)
+```
+
+
+这段代码除了要求电脑上安装好 Shiny之外，并没有其他的要求。因此任何人都可以运行这个代码并看到问题：“二进列运算符中有非数值参数”。
+
+**清楚地表述问题是获取帮助的第一步，因为任何人都可以通过复制粘贴重复问题，所以他们可以更加容易研究你的代码以及测试可能的解决方案**。这个例子中，你需要使用 `as.numeric(input$n)` 因为 `selectInput()` 创建了一个字符串存储在 `input$n` 中。
+
+## 创建 reprex
+
+创建 reprex 的第一步是创建一个包含能够运行你代码所需一切的文件。你需要通过启动一个新的 R 会话并从头到尾运行代码进行检查。确保你没有忘记任何需要载入的包。
+
+通常来说，让你的 app 能够在别人的电脑上成功运行的最具有挑战性部分是消除仅存储在你电脑上的数据的使用。有 3 个有用的方法：
+
+- 数据经常和你的问题并没有直接关系，你可以使用内置的数据集 `mtcars` 或 `iris` 生成和阐述问题。
+- 其他时候，你可能需要自己写一点 R 代码创建一个用于解释问题的数据集：
+
+```r
+mydata <- data.frame(x = 1:5, y = c("a", "b", "c", "d", "e"))
+```
+
+- 如果上述方法失效，你可以将你的数据使用 `dput()` 函数转换为代码。例如，`dput(mydata)` 生成了重新创建数据集 `mydata` 的代码：
+
+```r
+dput(mydata)
+#> structure(list(x = 1:5, y = structure(1:5, .Label = c("a", "b", 
+#> "c", "d", "e"), class = "factor")), class = "data.frame", row.names = c(NA, 
+#> -5L))
+```
+
+  接着你将下面的代码放到 reprex 中生成 `mydata`：
+
+```r
+mydata <- structure(list(x = 1:5, y = structure(1:5, .Label = c("a", "b", 
+"c", "d", "e"), class = "factor")), class = "data.frame", row.names = c(NA, 
+-5L))
+```
+
+  通常这种方法针对你的原始数据会生成大量的代码，所以寻找一个数据的子集用于阐述你的问题。你提供的数据集越少，别人就更容易帮助你解决问题。
+
+  

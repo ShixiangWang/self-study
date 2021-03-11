@@ -1,0 +1,231 @@
+# 响应式编程基础（三） - 响应表达式
+
+前面我们已经快速接触了几次响应表达式，相信读者大致了解它是做什么的。本文将进一步深入学习这个知识点，展示为什么它对于构建网页应用很重要。
+
+它的重要性有两点：
+
+- 当输入改变时，它可以有效减少计算、提升应用效率。
+- 通过简化响应图可以让人更容易理解应用
+
+响应表达式同时具有输入控件和输出控件的味道：
+
+- 像输入控件，读者可以在输出控件中使用响应表达式的结果。
+- 像输出控件，响应表达式依赖于输入控件并知道什么时候它需要自动更新。
+
+它的地位如下图：
+
+![](https://d33wubrfki0l68.cloudfront.net/40d322b71097f39f721fd90b905450724eb22d9d/efe97/diagrams/basic-reactivity/producers-consumers.png)
+
+接下来我们需要一个更加复杂的应用来查看相应表达式带来的好处。首先我们定义一些常规的 R 函数驱动后面创建的应用。
+
+## 动机
+
+**想象一下我们想要使用一个图和一个假设检验来比较两个模拟的数据集**。我们已经做了一些实验并创建了下面的函数：`histogram()`  用直方图可视化 2 个分布，而 `t_test()` 使用 t 检验比较均值并汇总结果：
+
+```r
+library(ggplot2)
+
+histogram <- function(x1, x2, binwidth = 0.1, xlim = c(-3, 3)) {
+  df <- data.frame(
+    x = c(x1, x2),
+    g = c(rep("x1", length(x1)), rep("x2", length(x2)))
+  )
+
+  ggplot(df, aes(x, fill = g)) +
+    geom_histogram(binwidth = binwidth) +
+    coord_cartesian(xlim = xlim)
+}
+
+t_test <- function(x1, x2) {
+  test <- t.test(x1, x2)
+  
+  sprintf(
+    "p value: %0.3f\n[%0.2f, %0.2f]",
+    test$p.value, test$conf.int[1], test$conf.int[2]
+  )
+}
+```
+
+如果我们有一些模拟数据，我们就可以用这些函数来比较 2 个变量：
+
+```r
+x1 <- rnorm(100, mean = 0, sd = 0.5)
+x2 <- rnorm(200, mean = 0.15, sd = 0.9)
+
+histogram(x1, x2)
+cat(t_test(x1, x2))
+```
+
+```
+p value: 0.061
+[-0.31, 0.01]
+```
+
+## 应用
+
+Shiny 应用避免了重复地修改和运行代码，是一种很好地探索数据方式。下面我们将创建一个应用用于交互式地更改输入。
+
+**让我们先从用户界面开始。第 1 行有 3 列分别放置 3 个输入控件（分布 1、分布 2 和绘图控件）。第 2 行用一个宽列用于绘图，一个窄列用于展示假设检验结果**。
+
+```r
+library(shiny)
+
+ui <- fluidPage(
+  fluidRow(
+    column(4, 
+      "Distribution 1",
+      numericInput("n1", label = "n", value = 1000, min = 1),
+      numericInput("mean1", label = "µ", value = 0, step = 0.1),
+      numericInput("sd1", label = "σ", value = 0.5, min = 0.1, step = 0.1)
+    ),
+    column(4, 
+      "Distribution 2",
+      numericInput("n2", label = "n", value = 1000, min = 1),
+      numericInput("mean2", label = "µ", value = 0, step = 0.1),
+      numericInput("sd2", label = "σ", value = 0.5, min = 0.1, step = 0.1)
+    ),
+    column(4,
+      "Histogram",
+      numericInput("binwidth", label = "Bin width", value = 0.1, step = 0.1),
+      sliderInput("range", label = "range", value = c(-3, 3), min = -5, max = 5)
+    )
+  ),
+  fluidRow(
+    column(9, plotOutput("hist")),
+    column(3, verbatimTextOutput("ttest"))
+  )
+)
+```
+
+然后基于前面定义的 2 个函数构建 Server 函数：
+
+```r
+server <- function(input, output, session) {
+  output$hist <- renderPlot({
+    x1 <- rnorm(input$n1, input$mean1, input$sd1)
+    x2 <- rnorm(input$n2, input$mean2, input$sd2)
+    
+    histogram(x1, x2, binwidth = input$binwidth, xlim = input$range)
+  })
+
+  output$ttest <- renderText({
+    x1 <- rnorm(input$n1, input$mean1, input$sd1)
+    x2 <- rnorm(input$n2, input$mean2, input$sd2)
+    
+    t_test(x1, x2)
+  })
+}
+```
+
+现在我们查看生成的应用：
+
+```r
+shinyApp(ui, server)
+```
+
+![](https://d33wubrfki0l68.cloudfront.net/3b489b65c56b36ffbe8fcf4b8141a46ed94dbd24/e8301/screenshots/basic-reactivity/case-study-1.png)
+
+读者可以通过 <https://hadley.shinyapps.io/basic-reactivity-cs/> 可以预览一个在线版本。
+
+## 响应图
+
+让我们开始绘制这个应用的响应图。**当然输入发生改变时，Shiny 可以非常聪明地自动更新结果；但 Shiny 无法聪明到选择性运行更新输出的代码。**换句话说，输出是原子类型的，它们整体要么执行要么不执行。
+
+例如：
+
+```r
+x1 <- rnorm(input$n1, input$mean1, input$sd1)
+x2 <- rnorm(input$n2, input$mean2, input$sd2)
+t_test(x1, x2)
+```
+
+作为一个人类，当我们读这段代码时我们知道只有当 `n1`、`mean1` 或 `sd1` 发生改变时才更新 `x1`；当 `n2`、`mean2` 或 `sd2` 发生改变时才更新 `x2`。但 Shiny 会把它们看作一个整体，只要更新输入中的任意一个，`x1` 和 `x2` 都要更新。
+
+因此，响应图如下：
+
+![](https://d33wubrfki0l68.cloudfront.net/a2edd0b0af27a1d432a6e4632300788663545663/10663/diagrams/basic-reactivity/case-study-1.png)
+
+我们注意到这个图非常稠密：几乎每个输入都跟每个输出直接连接到了一起。这产生了 2 个问题：
+
+- 由于存在大量连接，这个应用变得很难理解。应用程序中没有任何内容可以单独进行分析。
+- 这个应用不高效，它的工作量超出它所需要的。例如，如果我们改变图形的刻度，数据就要重新进行计算；如果我们改变 `n1` 的值，`x2` 也在两处更新了！
+
+该应用还有一个重要的问题：直方图和 t 检验使用的是不同的随机数据。这个操作非常具有误导性，因为我们应当使用完全一致的数据进行工作。
+
+幸运地是，我们可以通过响应表达式减少重复计算并解决问题。
+
+## 简化响应图
+
+在下面的 server 函数中我们重构已有的代码为 2 个新的响应表达式 `x1` 和 `x2`。要创建一个响应表达式，我们调用 `reactive()` 并将结果赋值给一个变量。后面我们像使用函数一样调用这个变量。
+
+```r
+server <- function(input, output, session) {
+  x1 <- reactive(rnorm(input$n1, input$mean1, input$sd1))
+  x2 <- reactive(rnorm(input$n2, input$mean2, input$sd2))
+
+  output$hist <- renderPlot({
+    histogram(x1(), x2(), binwidth = input$binwidth, xlim = input$range)
+  })
+
+  output$ttest <- renderText({
+    t_test(x1(), x2())
+  })
+}
+```
+
+这产生了一个更简单的响应图。这个更简单的图让我们更容易理解该应用；分布参数值也仅仅影响对应的输出。代码的重写不仅减少了计算以提升了效率，而且现在当我们改变图形参数时，底层的数据不再会变动。
+
+![](https://d33wubrfki0l68.cloudfront.net/e1696906fd29484c89e9690ebc01ac06d3ac14be/af794/diagrams/basic-reactivity/case-study-2.png)
+
+为了强化模块性，下面的响应图在独立模块周围绘制了矩形框。模块可以抽取重复的代码以便于重新利用，它是一种非常强大的技术，当我们在 Shiny 中需要复制粘贴代码时，我们就应该考虑进行模块化。内容我们会在后面文章中介绍。
+
+![](https://d33wubrfki0l68.cloudfront.net/5f7dedab256e16a6030b9536465795f8c61979cc/04fe0/diagrams/basic-reactivity/case-study-3.png)
+
+## 为什么我们需要响应表达式
+
+**因为通过创建变量和函数的方式减少重复在 Shiny 中是不工作的**。
+
+比如使用变量：
+
+```r
+server <- function(input, output, session) {
+  x1 <- rnorm(input$n1, input$mean1, input$sd1)
+  x2 <- rnorm(input$n2, input$mean2, input$sd2)
+
+  output$hist <- renderPlot({
+    histogram(x1, x2, binwidth = input$binwidth, xlim = input$range)
+  })
+
+  output$ttest <- renderText({
+    t_test(x1, x2)
+  })
+}
+```
+
+上面代码会报错，就算不报错，`x1` 和 `x2` 也只会计算一次，无法达到自动更新的目的。
+
+如果使用函数，该应用能够正常工作：
+
+```r
+server <- function(input, output, session) { 
+  x1 <- function() rnorm(input$n1, input$mean1, input$sd1)
+  x2 <- function() rnorm(input$n2, input$mean2, input$sd2)
+
+  output$hist <- renderPlot({
+    histogram(x1(), x2(), binwidth = input$binwidth, xlim = input$range)
+  })
+
+  output$ttest <- renderText({
+    t_test(x1(), x2())
+  })
+}
+```
+
+但任何输入的改变会导致所有输出都重新进行计算。
+
+也就是说：
+
+- 使用变量值只被计算一次（粥太冷）。
+- 使用函数每次调用时值都会计算（粥太热）。
+- 使用响应表达式只在它需要改变时进行计算（粥恰恰好）。
+

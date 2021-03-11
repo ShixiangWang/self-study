@@ -1,0 +1,78 @@
+# Hello world
+
+> Shiny 是一个开源的 R 包，它为使用 R 构建 Web 应用提供了一个优雅有力的 Web 框架。
+> Shiny 帮助你在不需要前端知识的条件下将数据分析转变为可交互的 Web 应用。
+
+## Shiny 构成与安装
+
+每个 Shiny App 都有 2 个关键的组成：
+
+- UI（用户界面）：定义应用的外形
+- Server（后端）：定义应用如何工作
+
+Shiny 应用了响应式编程技术，可以根据输入的变换自动更新输出。
+
+在创建 Shiny 应用前，我们需要安装和载入 Shiny 包。
+
+使用下面命令进行安装：
+
+```r
+install.packages("shiny")
+```
+
+然后将包载入当前 R 会话：
+
+```r
+library(shiny)
+```
+
+## Hello world 示例
+
+在几种创建 Shiny 应用的方式中，最简单的是先创建一个新的目录，然后放置一个新的文件 app.R。
+
+```r
+library(shiny)
+
+ui = "Hello, world!"
+
+server = function(input, output, session) {
+
+}
+
+shinyApp(ui, server)
+```
+
+这就创建了一个小的 Shiny 应用！
+
+我们上面的代码做了以下 4 个事情：
+
+1.  载入 shiny 包。
+2.  定义了一个 UI，输出 Hello world!。
+3.  通过 server() 函数指定了应用的行为，这里目前是空的，什么都不干。
+4.  使用 shinyApp(ui, server) 构建和启动一个 Shiny 应用。
+
+## 如何运行
+
+如果使用 RStudio：
+
+- 点击文档工具栏的 Run App 按钮。
+- 使用 Cmd/Ctrl + Shift + Enter 快捷键。
+
+如果没有使用 Rstudio：
+
+- 使用 source() 运行 app.R 代码脚本。
+- 将含 app.R 的目录传入 shiny::runApp() 。
+
+运行后通过浏览器可以看到输出 `Hello, world!`。
+
+![](https://upload-images.jianshu.io/upload_images/3884693-f28131af62cee837.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+
+## 停止
+
+运行后 R 会话会处于忙碌状态，需要用以下方式停止：
+
+- RStudio 中点击工具栏中的停止图标。
+- R 控制台中键入 `Ctrl` + `C`。
+- 关闭 Shiny 应用窗口。
+
