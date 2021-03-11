@@ -9,6 +9,8 @@
 - [R](r)
 - [Python](python)
 - [Golang](go)
+- [C++](cpp)
+- [rcpp](rcpp)
 - [Shell](shell)
 - [Javascript](js)
 
