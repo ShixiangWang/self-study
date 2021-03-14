@@ -14,6 +14,7 @@ func main() {
 	/*
 		"Hello"
 	*/
+	"Hello"
 
 	// It will say: "evaluted but not used"
 	//

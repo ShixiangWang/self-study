@@ -8,10 +8,15 @@
 
 package main
 
-import "fmt"
-import f "fmt"
+import (
+	"fmt"
+	f "fmt"
+)
+
+var p = f.Println
 
 func main() {
 	fmt.Println("Hello!")
 	f.Println("There!")
+	p("Shixiang")
 }
