@@ -7,4 +7,4 @@
 - Go 实战 《Go in Action》 中文版本 - 书籍资源：https://github.com/goinaction/code
 - [The way to Go](https://github.com/unknwon/the-way-to-go_ZH_CN/blob/master/eBook/directory.md)
 - [Learn Go](./learngo)
-
+- [微软：go first step](https://docs.microsoft.com/zh-cn/learn/paths/go-first-steps)
