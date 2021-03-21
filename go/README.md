@@ -8,3 +8,19 @@
 - [The way to Go](https://github.com/unknwon/the-way-to-go_ZH_CN/blob/master/eBook/directory.md)
 - [Learn Go](./learngo)
 - [微软：go first step](https://docs.microsoft.com/zh-cn/learn/paths/go-first-steps)
+
+## 一些笔记
+
+使用本地包依赖：
+
+> <https://docs.microsoft.com/zh-cn/learn/modules/go-variables-functions-packages/4-packages>
+
+```
+module helloworld
+
+go 1.14
+
+require github.com/myuser/calculator v0.0.0
+
+replace github.com/myuser/calculator => ../calculator
+```
