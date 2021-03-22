@@ -24,3 +24,53 @@ require github.com/myuser/calculator v0.0.0
 
 replace github.com/myuser/calculator => ../calculator
 ```
+
+`switch` 使用正则：
+
+```go
+package main
+
+import "fmt"
+
+import "regexp"
+
+func main() {
+    var email = regexp.MustCompile(`^[^@]+@[^@.]+\.[^@.]+`)
+    var phone = regexp.MustCompile(`^[(]?[0-9][0-9][0-9][). \-]*[0-9][0-9][0-9][.\-]?[0-9][0-9][0-9][0-9]`)
+
+    contact := "foo@bar.com"
+
+    switch {
+    case email.MatchString(contact):
+        fmt.Println(contact, "is an email")
+    case phone.MatchString(contact):
+        fmt.Println(contact, "is a phone number")
+    default:
+        fmt.Println(contact, "is not recognized")
+    }
+}
+```
+
+`switch` 替换多重 if-else：
+
+```go
+package main
+
+import (
+    "fmt"
+    "math/rand"
+    "time"
+)
+
+func main() {
+    rand.Seed(time.Now().Unix())
+    r := rand.Float64()
+    switch {
+    case r > 0.1:
+        fmt.Println("Common case, 90% of the time")
+    default:
+        fmt.Println("10% of the time")
+    }
+}
+```
+
