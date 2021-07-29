@@ -49,3 +49,12 @@ print(nx.density(CG))
 # Subnetwork
 K5 = nx.complete_graph(5)
 clique = nx.subgraph(K5, (0, 1, 2))
+
+# Degree
+G.degree(2)  # returns the degree of node 2
+G.degree()   # returns the degree of all nodes of G 
+
+D.in_degree(4)
+D.out_degree(4)
+D.degree(4)
+
