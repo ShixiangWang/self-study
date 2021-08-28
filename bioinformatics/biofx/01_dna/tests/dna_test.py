@@ -42,7 +42,8 @@ def test_arg() -> None:
     """ Uses command-line arg """
 
     for file, expected in [TEST1, TEST2, TEST3]:
-        dna = open(file).read()
+        with open(file, 'r', encoding="utf-8") as f:
+            dna = f.read()
         retval, out = getstatusoutput(f'{RUN} {dna}')
         assert retval == 0
         assert out == expected

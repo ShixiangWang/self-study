@@ -24,7 +24,8 @@ def get_args() -> Args:
     args = parser.parse_args()
 
     if os.path.isfile(args.dna):
-        args.dna = open(args.dna).read().rstrip()
+        with open(args.dna, 'r', encoding='utf-8') as f:
+            args.dna = f.read().rstrip()
 
     return Args(args.dna)
 
