@@ -60,7 +60,7 @@ def find_gc(seq: str) -> float:
     if not seq:
         return 0
 
-    gc = len([base for base in seq.upper() if base in 'CG'])
+    gc = len(list(filter(lambda base: base in 'CG', seq.upper())))
     return (gc * 100) / len(seq)
 
 
