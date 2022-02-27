@@ -1,6 +1,5 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # GNU Make 3.81
- 
 # Copyright (C) 2006  Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.
 # There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
@@ -11,7 +10,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target `all'.  Stop.
  
 
-# Make data base, printed on Wed Jan 19 00:03:58 2022
+# Make data base, printed on Sat Feb  5 09:43:21 2022
 
 # Variables
 
@@ -50,7 +49,7 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/bj/nw1w4g1j37ddpgb6zmh3sfh80000gn/T/vscode-ipc-6eccc435-66be-4e46-b69c-e1a1674c2bd2.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/bj/nw1w4g1j37ddpgb6zmh3sfh80000gn/T/vscode-ipc-de482df4-cb9c-4429-aac2-e58ad631ded4.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -64,6 +63,8 @@ GOPATH = /Users/wsx/go
 # environment
 GITEE_TOKEN = 5d7629a9192bdc4c4c39da3a2b85fdcc
 # environment
+LaunchInstanceID = 730EE8CF-EB8A-4973-9CA6-49B5DEAEAF1F
+# environment
 VSCODE_LOG_STACK = false
 # environment
 ELECTRON_RUN_AS_NODE = 1
@@ -72,11 +73,11 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 LS_COLORS = di=34;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=0;41:sg=0;46:tw=0;42:ow=0;43:
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.POgsfJqNQl/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.wDYacQpOlQ/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
-DISPLAY = /private/tmp/com.apple.launchd.vCf2tpg1i1/org.xquartz:0
+DISPLAY = /private/tmp/com.apple.launchd.u3gQjjrVS3/org.xquartz:0
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
@@ -89,11 +90,11 @@ GOMODCACHE = /Users/wsx/go/pkg/mod
 HOME = /Users/wsx
 # default
 MAKEFILEPATH := /Applications/Xcode.app/Contents/Developer/Makefiles
- 
 # environment
 VSCODE_CODE_CACHE_PATH = /Users/wsx/Library/Application Support/Code/CachedData/fe719cd3e5825bf14e14182fddeb88ee8daf044f
 # environment
 LOGNAME = wsx
+ 
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # environment
@@ -160,6 +161,8 @@ MAKEFILES :=
 PAGER = less
 # environment
 LC_ALL = C
+# environment
+SECURITYSESSIONID = 186a3
 # automatic
 ^F = $(notdir $^)
 # default
@@ -171,9 +174,9 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 13402
+VSCODE_PID = 505
 # variable set hash-table stats:
-# Load=78/1024=8%, Rehash=0, Collisions=3/99=3%
+# Load=80/1024=8%, Rehash=0, Collisions=3/101=3%
 
 # Pattern-specific Variable Values
 
@@ -181,7 +184,7 @@ VSCODE_PID = 13402
 
 # Directories
 
-# . (device 16777221, inode 13005122): 33 files, no impossibilities.
+# . (device 16777220, inode 13005122): 33 files, no impossibilities.
 
 # 33 files, no impossibilities in 1 directories.
 
@@ -255,6 +258,6 @@ GNUmakefile:
 # strcache size: total = 0 / max = 0 / min = 4096 / avg = 0
 # strcache free: total = 0 / max = 0 / min = 4096 / avg = 0
 
-# Finished Make data base on Wed Jan 19 00:03:58 2022
+# Finished Make data base on Sat Feb  5 09:43:21 2022
 
  
