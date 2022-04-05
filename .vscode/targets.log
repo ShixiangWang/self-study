@@ -8,9 +8,9 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This program built for i386-apple-darwin11.3.0
  
 make: *** No rule to make target `all'.  Stop.
- 
 
-# Make data base, printed on Sat Feb  5 09:43:21 2022
+
+# Make data base, printed on Tue Apr  5 22:43:36 2022
 
 # Variables
 
@@ -33,7 +33,7 @@ CURDIR := /Users/wsx/Documents/GitHub/self-study
 # makefile
 SHELL = /bin/sh
 # environment
-VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn","_translationsConfigFile":"/Users/wsx/Library/Application Support/Code/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/tcf.json","_cacheRoot":"/Users/wsx/Library/Application Support/Code/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/wsx/Library/Application Support/Code/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/fe719cd3e5825bf14e14182fddeb88ee8daf044f","_corruptedFile":"/Users/wsx/Library/Application Support/Code/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"2d459c3c1e4312b6770e21efe80cc342.zh-cn","_translationsConfigFile":"/Users/wsx/Library/Application Support/Code/clp/2d459c3c1e4312b6770e21efe80cc342.zh-cn/tcf.json","_cacheRoot":"/Users/wsx/Library/Application Support/Code/clp/2d459c3c1e4312b6770e21efe80cc342.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/wsx/Library/Application Support/Code/clp/2d459c3c1e4312b6770e21efe80cc342.zh-cn/e18005f0f1b33c29e81d732535d8c0e47cafb0b5","_corruptedFile":"/Users/wsx/Library/Application Support/Code/clp/2d459c3c1e4312b6770e21efe80cc342.zh-cn/corrupted.info","_languagePackSupport":true}
 # environment
 _ = /usr/bin/make
 # environment
@@ -43,13 +43,13 @@ MAKEFILE_LIST :=
 # environment
 GO111MODULE = on
 # environment
-VSCODE_AMD_ENTRYPOINT = vs/workbench/services/extensions/node/extensionHostProcess
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/bj/nw1w4g1j37ddpgb6zmh3sfh80000gn/T/vscode-ipc-de482df4-cb9c-4429-aac2-e58ad631ded4.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/bj/nw1w4g1j37ddpgb6zmh3sfh80000gn/T/vscode-ipc-22e40ffd-2662-4a16-bf20-cbceeca912f0.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -63,7 +63,7 @@ GOPATH = /Users/wsx/go
 # environment
 GITEE_TOKEN = 5d7629a9192bdc4c4c39da3a2b85fdcc
 # environment
-LaunchInstanceID = 730EE8CF-EB8A-4973-9CA6-49B5DEAEAF1F
+LaunchInstanceID = 517AC627-3B6F-4697-A696-7500A933ECA7
 # environment
 VSCODE_LOG_STACK = false
 # environment
@@ -73,11 +73,11 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 LS_COLORS = di=34;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=0;41:sg=0;46:tw=0;42:ow=0;43:
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.wDYacQpOlQ/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.q3B9JBWmdq/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
-DISPLAY = /private/tmp/com.apple.launchd.u3gQjjrVS3/org.xquartz:0
+DISPLAY = /private/tmp/com.apple.launchd.TufGPqXCkj/org.xquartz:0
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
@@ -91,12 +91,11 @@ HOME = /Users/wsx
 # default
 MAKEFILEPATH := /Applications/Xcode.app/Contents/Developer/Makefiles
 # environment
-VSCODE_CODE_CACHE_PATH = /Users/wsx/Library/Application Support/Code/CachedData/fe719cd3e5825bf14e14182fddeb88ee8daf044f
+VSCODE_CODE_CACHE_PATH = /Users/wsx/Library/Application Support/Code/CachedData/e18005f0f1b33c29e81d732535d8c0e47cafb0b5
 # environment
 LOGNAME = wsx
- 
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
 ZSH = /Users/wsx/.oh-my-zsh
 # environment
@@ -136,7 +135,7 @@ TMPDIR = /var/folders/bj/nw1w4g1j37ddpgb6zmh3sfh80000gn/T/
 # environment
 NODE_PATH = /usr/local/lib/node_modules
 # environment
-VSCODE_IPC_HOOK = /Users/wsx/Library/Application Support/Code/1.63.1-main.sock
+VSCODE_IPC_HOOK = /Users/wsx/Library/Application Support/Code/1.66.0-main.sock
 # makefile
 MAKEFLAGS = Rrqp
 # environment
@@ -144,7 +143,7 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-XPC_SERVICE_NAME = application.com.microsoft.VSCode.33030967.33030974
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.36424930.36424936
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # automatic
@@ -174,7 +173,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 505
+VSCODE_PID = 1580
 # variable set hash-table stats:
 # Load=80/1024=8%, Rehash=0, Collisions=3/101=3%
 
@@ -184,7 +183,8 @@ VSCODE_PID = 505
 
 # Directories
 
-# . (device 16777220, inode 13005122): 33 files, no impossibilities.
+# . (device 16777221, inode 13005122): 33 files, no impossibilities.
+ 
 
 # 33 files, no impossibilities in 1 directories.
 
@@ -258,6 +258,6 @@ GNUmakefile:
 # strcache size: total = 0 / max = 0 / min = 4096 / avg = 0
 # strcache free: total = 0 / max = 0 / min = 4096 / avg = 0
 
-# Finished Make data base on Sat Feb  5 09:43:21 2022
+# Finished Make data base on Tue Apr  5 22:43:36 2022
 
  
