@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN"> <!--主语言设置-->
+<head>
+    <!--它包含了所有你想包含在 HTML 页面中但不想在 HTML 页面中显示的内容。这些内容包括你想在搜索结果中出现的关键字和页面描述，CSS 样式，字符集声明等等。-->
+    <meta charset="utf-8">
+    <meta name="author" content="Chris Mills">
+    <!--浏览器检索到的摘要内容-->
+    <meta name="description" content="The MDN Web Docs Learning Area aims to provide
+    complete beginners to the Web with all they need to know to get
+    started with developing web sites and applications.">
+
+    <!--链接CSS-->
+    <link rel="stylesheet" href="my-css-file.css">
+
+    <!--链接JS-->
+    <!--同时最好加上 defer 以告诉浏览器在解析完成 HTML 后再加载 JavaScript。这样可以确保在加载脚本之前浏览器已经解析了所有的 HTML 内容（如果脚本尝试访问某个不存在的元素，浏览器会报错）。实际上还有很多方法可用于处理加载 JavaScript 的问题，但这是现代浏览器中最可靠的一种方法。-->
+    <script src="my-js-file.js" defer></script>
+
+
+    <title>我的测试站点</title>
+</head>
+<body>
+<h1>经典回忆</h1>
+    <p>
+    相思无用，惟别而已。别期若有定，千般煎熬又何如？莫道黯然销魂，何处<strong>柳暗花明</strong>？<br>
+    ——《<a href="https://zh.wikipedia.org/zh-hans/神鵰俠侶">神雕侠侣</a>》
+    </p>
+    <img src="https://roy-tian.github.io/learning-area/extras/tools/playable-code/images/sdxl.jfif">
+
+    <p>欲练<a href="https://zh.wikipedia.org/zh-hans/葵花宝典" title="葵花宝典简介" target="_blank">葵花宝典</a>，需引刀自宫</p>
+    <!-- 使用 disabled 属性来防止终端用户输入文本到输入框中 -->
+    <input type="text" disabled>
+
+    <!-- 下面这个输入框没有 disabled 属性，所以用户可以向其中输入 -->
+    <input type="text">
+
+    &lt; &gt; &quot; &apos; &amp;
+
+    <p>Japanese example: ご飯が熱い。</p>
+
+
+</body>
+</html>

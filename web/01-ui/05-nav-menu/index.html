@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Homepage</title>
+</head>
+
+<body>
+    <!-- put navigation menu just below here -->
+
+    <h1>Homepage</h1>
+
+    <p>Welcome to my exciting homepage</p>
+
+    <dl>
+        <dt>培根</dt>
+        <dd>整个世界的粘合剂。</dd>
+        <dt>鸡蛋</dt>
+        <dd>一块蛋糕的粘合剂。</dd>
+        <dt>咖啡</dt>
+        <dd>一种浅棕色的饮料。</dd>
+        <dd>可以在清晨带来活力。</dd>
+    </dl>
+
+    <blockquote cite="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote">
+        <p>
+            The <strong>HTML <code>&lt;blockquote&gt;</code> Element</strong> (or
+            <em>HTML Block Quotation Element</em>) indicates that the enclosed text
+            is an extended quotation.
+        </p>
+    </blockquote>
+
+    <p>
+        The quote element — <code>&lt;q&gt;</code> — is
+        <q cite="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/q">intended for short quotations that don't
+            require paragraph breaks.</q>
+    </p>
+
+    <p>
+        According to the
+        <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote">
+            <cite>MDN blockquote page</cite></a>:
+    </p>
+
+    <blockquote cite="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote">
+        <p>
+            The <strong>HTML <code>&lt;blockquote&gt;</code> Element</strong> (or
+            <em>HTML Block Quotation Element</em>) indicates that the enclosed text
+            is an extended quotation.
+        </p>
+    </blockquote>
+
+    <p>
+        The quote element — <code>&lt;q&gt;</code> — is
+        <q cite="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/q">intended for short quotations that don't
+            require paragraph breaks.</q>
+        --
+        <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/q">
+            <cite>MDN q page</cite></a>.
+    </p>
+
+    <p>
+        <abbr title="美国国家航空航天局（National Aeronautics and Space Administration）">NASA</abbr>
+        做了一些动人心弦的事情。
+    </p>
+
+    <address>
+        <p>Page written by <a href="../authors/chris-mills/">Chris Mills</a>.</p>
+    </address>
+
+    <p>
+        咖啡因的化学方程式是
+        C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub>。
+    </p>
+    <p>如果 x<sup>2</sup> 的值为 9，那么 x 的值必为 3 或 -3。</p>
+    <pre><code>const para = document.querySelector('p');
+
+        para.onclick = function() {
+          alert('噢，噢，噢，别点我了。');
+        }</code></pre>
+
+    <p>请不要使用 <code>&lt;font&gt;</code> 、 <code>&lt;center&gt;</code> 等表象元素。</p>
+
+    <p>在上述的 JavaScript 示例中，<var>para</var> 表示一个段落元素。</p>
+
+
+    <p>按 <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>A</kbd> 选择全部内容。</p>
+
+    <pre>$ <kbd>ping mozilla.org</kbd>
+        <samp>PING mozilla.org (63.245.215.20): 56 data bytes
+        64 bytes from 63.245.215.20: icmp_seq=0 ttl=40 time=158.233 ms</samp></pre>
+
+    <time datetime="2016-01-20">2016 年 1 月 20 日</time>
+
+    <!-- 标准简单日期 -->
+    <time datetime="2016-01-20">20 January 2016</time>
+    <!-- 只包含年份和月份-->
+    <time datetime="2016-01">January 2016</time>
+    <!-- 只包含月份和日期 -->
+    <time datetime="01-20">20 January</time>
+    <!-- 只包含时间，小时和分钟数 -->
+    <time datetime="19:30">19:30</time>
+    <!-- 还可包含秒和毫秒 -->
+    <time datetime="19:30:01.856">19:30:01.856</time>
+    <!-- 日期和时间 -->
+    <time datetime="2016-01-20T19:30">7.30pm, 20 January 2016</time>
+    <!-- 含有时区偏移值的日期时间 -->
+    <time datetime="2016-01-20T19:30+01:00">7.30pm, 20 January 2016 is 8.30pm in France</time>
+    <!-- 调用特定的周 -->
+    <time datetime="2016-W04">The fourth week of 2016</time>
+
+</body>
+
+</html>

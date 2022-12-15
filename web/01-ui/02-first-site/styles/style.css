@@ -1,0 +1,45 @@
+html {
+  /* px 表示“像素（pixels）”: 基础字号为 10 像素 */
+  font-size: 10px;
+  /* Google fonts 输出的 CSS */
+  font-family: 'Open Sans', sans-serif;
+  background-color: #00539F;
+}
+
+body {
+    /*强制页面永远保持 600 像素宽。*/
+    width: 600px;
+    margin: 0 auto;
+    background-color: #FF9500;
+    padding: 0 20px 20px 20px;
+    /*值以上、右、下、左的顺序排列。*/
+    border: 5px solid black;
+}
+
+
+h1 {
+    font-size: 60px;
+    text-align: center;
+
+    margin: 0;
+    padding: 20px 0;
+    color: #00539F;
+    text-shadow: 3px 3px 1px black;
+}
+
+p, li {
+    font-size: 16px;
+    /* line-height 后面可以跟不同的参数，如果是数字，就是当前字体大小乘上数字 */
+    line-height: 2;
+    letter-spacing: 1px;
+}
+
+
+/*
+我们把图像居中来使页面更美观。可以复用 body 的 margin: 0 auto ，但是需要一点点调整。 <body> 元素是块级元素，意味着它占据了页面的空间并且能够赋予外边距和其他改变间距的值。而图片是内联元素，不具备块级元素的一些功能。所以为了使图像有外边距，我们必须使用 display: block 给予其块级行为。
+*/
+img {
+    display: block;
+    margin: 0 auto;
+}
+
