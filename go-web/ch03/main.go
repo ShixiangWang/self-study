@@ -13,7 +13,7 @@ const (
     DBHost = "127.0.0.1"
     DBPort = ":3306"
     DBUser = "root"
-    DBPass = "wsx@zd1994"
+    DBPass = "wsx@zd"
     DBDbase = "cms"
     PORT = ":8080"
 )
