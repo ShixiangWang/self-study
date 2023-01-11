@@ -23,7 +23,7 @@ test_acc_list = []
 iter_per_epoch = max(train_size / batch_size, 1)
 
 for i in range(iters_num):
-    batch_mask = np.random.choice(train_size, batch_size)
+    batch_mask = np.random.choice(train_size, batch_size)  # 这种随机抽样一个epoch会抽到重复样本
     x_batch = x_train[batch_mask]
     t_batch = t_train[batch_mask]
     
@@ -46,7 +46,7 @@ for i in range(iters_num):
         print("train acc, test acc | " + str(train_acc) + ", " + str(test_acc))
 
 # 绘制图形
-markers = {'train': 'o', 'test': 's'}
+#markers = {'train': 'o', 'test': 's'}
 x = np.arange(len(train_acc_list))
 plt.plot(x, train_acc_list, label='train acc')
 plt.plot(x, test_acc_list, label='test acc', linestyle='--')
