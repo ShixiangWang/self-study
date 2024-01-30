@@ -1,5 +1,9 @@
 # Something to play around
 
+### HTML quicklist
+
+- <https://www.runoob.com/html/html-quicklist.html>
+- tagname: <https://www.runoob.com/html/html-tag-name.html>
 
 ### HTML layout
 
@@ -23,3 +27,9 @@
 ### HTML symbols
 
 - <https://www.runoob.com/html/html-entities.html>
+
+
+### HTML url
+
+- <https://www.runoob.com/html/html-url.html>
+- <https://www.runoob.com/tags/html-urlencode.html>
